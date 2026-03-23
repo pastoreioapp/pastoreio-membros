@@ -48,3 +48,13 @@ This version has breaking changes — APIs, conventions, and file structure may 
 - If the trajectory changes, update `app/types/trajetoria.ts` first and let UI/validation derive from it.
 - If form fields change, update `lib/mapeamento/constants.ts` and the server validation flow together.
 - If the database schema changes, review `migrations/initial_structure.sql` and `lib/mapeamento/*` in the same task.
+
+## Cursor Cloud specific instructions
+
+- **Package manager:** npm (lockfile is `package-lock.json`).
+- **Dev server:** `npm run dev` starts Next.js on port 3000.
+- **Lint:** `npm run lint` runs ESLint. Currently passes with only warnings.
+- **Build:** `npm run build` produces a production build.
+- **No test framework** is configured; there are no automated tests to run.
+- **Supabase env vars** (`NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`) must be set as Cursor secrets. The app gracefully shows a config error message if they are missing, but forms won't submit.
+- The app is a single-page member registration flow at `/`. The "hello world" task is: select a cell group, enter a name, check trajectory steps, and click "SALVAR MEMBRO".
