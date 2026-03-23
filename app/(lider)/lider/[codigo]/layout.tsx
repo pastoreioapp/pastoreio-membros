@@ -3,6 +3,7 @@ import Image from "next/image";
 import { notFound } from "next/navigation";
 
 import { CelulaContextCard } from "@/components/membros/celula-context";
+import { LeaderPageRefresh } from "@/components/membros/leader-page-refresh";
 import { resolveLeaderRouteAccess } from "@/lib/mapeamento/rotas";
 
 export default async function LeaderAreaLayout({
@@ -34,6 +35,7 @@ export default async function LeaderAreaLayout({
       </header>
 
       <div className="mx-auto w-full max-w-[816px] px-4 py-8 sm:px-6 sm:py-10">
+        <LeaderPageRefresh />
         <div className="space-y-6">
           <CelulaContextCard
             celula={access.celula}

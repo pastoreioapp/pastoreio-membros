@@ -10,10 +10,14 @@ export function MemberSelfRegisterShare({
   href,
 }: MemberSelfRegisterShareProps) {
   const [copied, setCopied] = useState(false);
+  const shareUrl =
+    typeof window === "undefined"
+      ? href
+      : new URL(href, window.location.origin).toString();
 
   async function handleCopyLink() {
     try {
-      await navigator.clipboard.writeText(href);
+      await navigator.clipboard.writeText(shareUrl);
       setCopied(true);
 
       window.setTimeout(() => {
@@ -38,7 +42,9 @@ export function MemberSelfRegisterShare({
       </p>
 
       <div className="mt-5 rounded-2xl border border-[#DCE3F1] bg-[#F7F9FD] p-3 sm:p-4">
-        <p className="break-all text-sm font-medium text-[#1A1C1F]">{href}</p>
+        <p className="break-all text-sm font-medium text-[#1A1C1F]">
+          {shareUrl}
+        </p>
       </div>
 
       <div className="mt-4 flex flex-col gap-3 sm:flex-row">
@@ -50,7 +56,7 @@ export function MemberSelfRegisterShare({
           {copied ? "Link copiado" : "Copiar link"}
         </button>
         <a
-          href={href}
+          href={shareUrl}
           target="_blank"
           rel="noreferrer"
           className="inline-flex min-h-12 items-center justify-center rounded-2xl border border-[#5974AD] px-5 text-sm font-bold uppercase tracking-widest text-[#3F5B93] transition hover:bg-[#EEF3FF]"
