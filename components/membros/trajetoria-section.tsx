@@ -58,8 +58,8 @@ export function TrajetoriaSection({
           </p>
         </div>
         </div>
-        <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-white">
-          <AccordionChevronIcon className="h-2 w-3 transition-transform group-open:rotate-180" />
+        <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-white transition-transform group-open:rotate-180">
+          <AccordionChevronIcon className="h-2 w-3" />
         </span>
       </summary>
 
