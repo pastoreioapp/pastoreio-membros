@@ -1,65 +1,93 @@
-import Image from "next/image";
+import { connection } from "next/server";
 
-export default function Home() {
+import {
+  MemberForm,
+  type CelulaOption,
+} from "@/components/membros/member-form";
+import { getSupabaseConfigError, getSupabaseServerClient } from "@/lib/supabase/server";
+
+async function loadCelulas(): Promise<{
+  celulas: CelulaOption[];
+  loadError: string | null;
+}> {
+  const configError = getSupabaseConfigError();
+
+  if (configError) {
+    return {
+      celulas: [],
+      loadError: configError,
+    };
+  }
+
+  try {
+    const supabase = getSupabaseServerClient();
+    const { data, error } = await supabase
+      .schema("mapeamento")
+      .from("celulas")
+      .select("id, nome, setor, dia_semana, horario")
+      .order("nome", { ascending: true });
+
+    if (error) {
+      throw error;
+    }
+
+    return {
+      celulas: (data ?? []).map((celula) => ({
+        id: celula.id,
+        nome: celula.nome,
+        setor: celula.setor,
+        diaSemana: celula.dia_semana,
+        horario: celula.horario,
+      })),
+      loadError: null,
+    };
+  } catch {
+    return {
+      celulas: [],
+      loadError:
+        "Nao foi possivel carregar as celulas agora. Verifique a conexao com o Supabase.",
+    };
+  }
+}
+
+export default async function Home() {
+  await connection();
+
+  const { celulas, loadError } = await loadCelulas();
+
   return (
-    <div className="flex flex-col flex-1 items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex flex-1 w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the page.tsx file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
+    <main className="mx-auto flex min-h-screen w-full max-w-2xl flex-col px-4 py-6 sm:px-6 sm:py-8">
+      <section className="rounded-[2rem] bg-slate-950 px-6 py-7 text-white shadow-xl shadow-slate-950/20">
+        <p className="text-sm font-semibold uppercase tracking-[0.25em] text-slate-300">
+          Mapeamento de membros
+        </p>
+        <h1 className="mt-3 text-3xl font-semibold tracking-tight">
+          Cadastro simples para acompanhar a trajetoria da celula.
+        </h1>
+        <p className="mt-3 max-w-xl text-base leading-7 text-slate-300">
+          Selecione a celula, informe o nome do membro e marque os passos
+          concluidos para salvar o registro com clareza e rapidez.
+        </p>
+
+        <div className="mt-6 grid gap-3 sm:grid-cols-3">
+          <div className="rounded-2xl bg-white/10 px-4 py-3">
+            <p className="text-sm text-slate-300">Etapas</p>
+            <p className="mt-1 text-lg font-semibold">4 blocos</p>
+          </div>
+          <div className="rounded-2xl bg-white/10 px-4 py-3">
+            <p className="text-sm text-slate-300">Passos</p>
+            <p className="mt-1 text-lg font-semibold">19 checkpoints</p>
+          </div>
+          <div className="rounded-2xl bg-white/10 px-4 py-3">
+            <p className="text-sm text-slate-300">Celulas ativas</p>
+            <p className="mt-1 text-lg font-semibold">{celulas.length}</p>
+          </div>
         </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
-        </div>
-      </main>
-    </div>
+      </section>
+
+      <section className="mt-6">
+        <MemberForm celulas={celulas} loadError={loadError} />
+      </section>
+    </main>
   );
 }
