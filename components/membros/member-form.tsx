@@ -2,7 +2,7 @@
 
 import { useActionState, useEffect, useMemo, useRef, useState } from "react";
 
-import { saveMemberAction } from "@/app/actions/membros";
+import { saveLeaderMemberAction } from "@/app/actions/membros";
 import {
   CategoriasTrajetoriaEntries,
   type PassoTrajetoria,
@@ -22,6 +22,7 @@ import { MEMBER_FORM_FIELDS } from "@/lib/mapeamento/constants";
 import {
   initialSaveMemberState,
   type CelulaOption,
+  type SaveMemberState,
 } from "@/lib/mapeamento/types";
 
 type MemberFormProps = {
@@ -29,7 +30,15 @@ type MemberFormProps = {
   loadError?: string | null;
   lockedAccessCode?: string;
   backHref?: string;
+  backLabel?: string;
   showLockedContextCard?: boolean;
+  formAction?: (
+    prevState: SaveMemberState,
+    formData: FormData
+  ) => Promise<SaveMemberState>;
+  submitLabel?: string;
+  title?: string;
+  description?: string;
 };
 
 export function MemberForm({
@@ -37,13 +46,18 @@ export function MemberForm({
   loadError = null,
   lockedAccessCode,
   backHref = "/",
+  backLabel = "Voltar",
   showLockedContextCard = false,
+  formAction: serverAction = saveLeaderMemberAction,
+  submitLabel,
+  title = "Trajetoria de Crescimento",
+  description,
 }: MemberFormProps) {
   const lockedCelulaId = lockedAccessCode ? (celulas[0]?.id ?? "") : "";
   const isLockedToSingleCelula = Boolean(lockedAccessCode);
   const selectorRef = useRef<HTMLDivElement>(null);
   const [state, formAction, pending] = useActionState(
-    saveMemberAction,
+    serverAction,
     initialSaveMemberState
   );
   const [nome, setNome] = useState("");
@@ -130,7 +144,7 @@ export function MemberForm({
               celula={selectedCelula}
               accessCode={lockedAccessCode ?? ""}
               actionHref={backHref}
-              actionLabel="Voltar"
+              actionLabel={backLabel}
             />
           ) : !isLockedToSingleCelula ? (
             <>
@@ -246,10 +260,11 @@ export function MemberForm({
         <div className="flex items-center justify-between gap-4 px-1">
           <div>
             <h2 className="font-heading text-2xl font-extrabold tracking-[-0.03em] text-[#1A1C1F] sm:text-[1.9rem]">
-              Trajetoria de Crescimento
+              {title}
             </h2>
             <p className="mt-2 text-sm leading-6 text-[#444750]">
-              {selectedPassos.length} de {TotalPassosTrajetoria} passos marcados
+              {description ??
+                `${selectedPassos.length} de ${TotalPassosTrajetoria} passos marcados`}
             </p>
           </div>
           <span className="rounded-full bg-[#D8E2FF] px-3 py-1 text-xs font-bold uppercase tracking-[0.08em] text-[#001A42]">
@@ -293,7 +308,7 @@ export function MemberForm({
       <div className="sticky bottom-4 z-20">
         <div className="rounded-4xl bg-linear-to-t from-[#F9F9FD] via-[#F9F9FD]/92 to-transparent p-3 pt-8">
           <div className="rounded-[1.4rem] bg-white/95 p-3 shadow-[0_-4px_24px_rgba(26,28,31,0.06)] backdrop-blur">
-            <SubmitButton disabled={isUnavailable} />
+            <SubmitButton disabled={isUnavailable} label={submitLabel} />
           </div>
         </div>
       </div>

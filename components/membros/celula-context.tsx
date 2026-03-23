@@ -76,8 +76,8 @@ export function CelulaAvatar({
 export function CelulaContextCard({
   celula,
   accessCode,
-  actionHref = "/",
-  actionLabel = "Trocar codigo",
+  actionHref,
+  actionLabel,
   badgeLabel = "Celula liberada por codigo",
 }: CelulaContextCardProps) {
   const scheduleLabel = getCelulaSchedule(celula);
@@ -95,12 +95,14 @@ export function CelulaContextCard({
           <span className="inline-flex rounded-full bg-[#D8E2FF] px-3 py-1 text-xs font-bold uppercase tracking-[0.12em] text-[#17305E]">
             {badgeLabel}
           </span>
-          <Link
-            href={actionHref}
-            className="text-sm font-bold text-[#3F5B93] underline underline-offset-4"
-          >
-            {actionLabel}
-          </Link>
+          {actionHref && actionLabel ? (
+            <Link
+              href={actionHref}
+              className="text-sm font-bold text-[#3F5B93] underline underline-offset-4"
+            >
+              {actionLabel}
+            </Link>
+          ) : null}
         </div>
 
         <div className="flex flex-col gap-6 sm:flex-row sm:items-center">

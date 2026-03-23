@@ -5,7 +5,7 @@ import { redirect } from "next/navigation";
 import { AccessCodeGate } from "@/components/membros/access-code-gate";
 import { resolveCelulaAccess } from "@/lib/mapeamento/acesso";
 import { ACCESS_CODE_SEARCH_PARAM } from "@/lib/mapeamento/constants";
-import { buildLeaderMembersRoute } from "@/lib/mapeamento/rotas";
+import { buildLeaderMembersRoute } from "@/lib/mapeamento/routes";
 
 type HomePageProps = {
   searchParams: Promise<Record<string, string | string[] | undefined>>;

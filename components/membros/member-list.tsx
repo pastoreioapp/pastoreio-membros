@@ -2,8 +2,10 @@
 
 import Link from "next/link";
 
+import { MemberSelfRegisterShare } from "@/components/membros/member-self-register-share";
 import { TotalPassosTrajetoria } from "@/app/types/trajetoria";
 import type { CelulaOption, MemberListItem } from "@/lib/mapeamento/types";
+import { buildMemberSelfRegistrationRoute } from "@/lib/mapeamento/routes";
 
 type MemberListProps = {
   accessCode: string;
@@ -22,6 +24,10 @@ function formatCreatedAt(value: string) {
 export function MemberList({ accessCode, celula, members }: MemberListProps) {
   return (
     <section className="space-y-5">
+      <MemberSelfRegisterShare
+        href={buildMemberSelfRegistrationRoute(accessCode)}
+      />
+
       <div className="flex flex-col gap-3 rounded-[28px] bg-white p-5 shadow-[0_18px_50px_rgba(26,28,31,0.08)] sm:flex-row sm:items-center sm:justify-between sm:p-6">
         <div>
           <span className="inline-flex rounded-full bg-[#D8E2FF] px-3 py-1 text-xs font-bold uppercase tracking-[0.12em] text-[#17305E]">
