@@ -15,7 +15,22 @@ export type LoadCelulasResult = {
   loadError: string | null;
 };
 
+export type CelulaAccessView = {
+  code: string;
+  celulaId: string;
+  celulaNome: string;
+};
+
+export type MemberListItem = {
+  id: string;
+  nome: string;
+  celulaId: string | null;
+  passosConcluidos: PassoTrajetoria[];
+  createdAt: string;
+};
+
 export type SaveMemberFieldErrors = {
+  codigoAcesso?: string;
   nome?: string;
   celulaId?: string;
   passos?: string;

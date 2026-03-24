@@ -121,3 +121,28 @@ export async function loadCelulaOptions(): Promise<LoadCelulasResult> {
     };
   }
 }
+
+export async function loadCelulaOptionById(
+  celulaId: string
+): Promise<LoadCelulasResult> {
+  const result = await loadCelulaOptions();
+
+  if (result.loadError) {
+    return result;
+  }
+
+  const celula = result.celulas.find((item) => item.id === celulaId);
+
+  if (!celula) {
+    return {
+      celulas: [],
+      loadError:
+        "Nao foi possivel localizar a celula vinculada a este codigo. Atualize os codigos cadastrados.",
+    };
+  }
+
+  return {
+    celulas: [celula],
+    loadError: null,
+  };
+}

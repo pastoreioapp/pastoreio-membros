@@ -9,4 +9,7 @@ export const MEMBER_FORM_FIELDS = {
   nome: "nome",
   celulaId: "celula_id",
   passosConcluidos: "passos_concluidos",
+  codigoAcesso: "codigo_acesso",
 } as const;
+
+export const ACCESS_CODE_SEARCH_PARAM = "codigo";

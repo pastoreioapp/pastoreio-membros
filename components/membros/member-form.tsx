@@ -1,95 +1,67 @@
 "use client";
 
-import Image from "next/image";
 import { useActionState, useEffect, useMemo, useRef, useState } from "react";
 
-import { saveMemberAction } from "@/app/actions/membros";
+import { saveLeaderMemberAction } from "@/app/actions/membros";
 import {
   CategoriasTrajetoriaEntries,
   type PassoTrajetoria,
   TotalPassosTrajetoria,
 } from "@/app/types/trajetoria";
 import {
-  ContextChevronIcon,
-  LeaderChipIcon,
   MemberInputIcon,
-  ScheduleChipIcon,
 } from "@/components/membros/member-form-icons";
+import {
+  CelulaAvatar,
+  CelulaContextCard,
+  CelulaContextContent,
+} from "@/components/membros/celula-context";
 import { SubmitButton } from "@/components/membros/submit-button";
 import { TrajetoriaSection } from "@/components/membros/trajetoria-section";
 import { MEMBER_FORM_FIELDS } from "@/lib/mapeamento/constants";
 import {
   initialSaveMemberState,
   type CelulaOption,
+  type SaveMemberState,
 } from "@/lib/mapeamento/types";
 
 type MemberFormProps = {
   celulas: CelulaOption[];
   loadError?: string | null;
+  lockedAccessCode?: string;
+  backHref?: string;
+  backLabel?: string;
+  showLockedContextCard?: boolean;
+  formAction?: (
+    prevState: SaveMemberState,
+    formData: FormData
+  ) => Promise<SaveMemberState>;
+  submitLabel?: string;
+  title?: string;
+  description?: string;
 };
-
-type CelulaAvatarProps = {
-  celula: CelulaOption | null;
-  className: string;
-  imageSizes: string;
-};
-
-function getCelulaInitials(nome: string | null | undefined) {
-  return (nome ?? "PM")
-    .split(" ")
-    .filter(Boolean)
-    .slice(0, 2)
-    .map((value) => value[0]?.toUpperCase() ?? "")
-    .join("");
-}
-
-function getCelulaSchedule(celula: CelulaOption | null) {
-  return [celula?.diaSemana, celula?.horario].filter(Boolean).join(", ");
-}
-
-function CelulaAvatar({ celula, className, imageSizes }: CelulaAvatarProps) {
-  const initials = getCelulaInitials(celula?.nome);
-  const [failedPhotoUrl, setFailedPhotoUrl] = useState<string | null>(null);
-  const photoUrl = celula?.fotoUrl ?? null;
-  const shouldShowImage = Boolean(photoUrl && failedPhotoUrl !== photoUrl);
-
-  return (
-    <div
-      className={`relative overflow-hidden rounded-full border-4 border-[#EDEDF1] bg-[#D8E2FF] ${className}`}
-    >
-      {shouldShowImage ? (
-        <Image
-          src={photoUrl!}
-          alt=""
-          fill
-          sizes={imageSizes}
-          className="object-cover"
-          onError={() => setFailedPhotoUrl(photoUrl)}
-        />
-      ) : (
-        <>
-          <div className="absolute inset-0 bg-[radial-gradient(circle_at_35%_30%,rgba(255,255,255,0.85),rgba(255,255,255,0)_55%),linear-gradient(135deg,rgba(63,91,147,0.18),rgba(89,116,173,0.45))]" />
-          <div className="absolute inset-0 rounded-full bg-[#3F5B93]/10" />
-          <span className="font-heading absolute inset-0 flex items-center justify-center text-2xl font-bold text-[#3F5B93]">
-            {initials || "PM"}
-          </span>
-        </>
-      )}
-    </div>
-  );
-}
 
 export function MemberForm({
   celulas,
   loadError = null,
+  lockedAccessCode,
+  backHref = "/",
+  backLabel = "Voltar",
+  showLockedContextCard = false,
+  formAction: serverAction = saveLeaderMemberAction,
+  submitLabel,
+  title = "Trajetoria de Crescimento",
+  description,
 }: MemberFormProps) {
+  const lockedCelulaId = lockedAccessCode ? (celulas[0]?.id ?? "") : "";
+  const isLockedToSingleCelula = Boolean(lockedAccessCode);
   const selectorRef = useRef<HTMLDivElement>(null);
   const [state, formAction, pending] = useActionState(
-    saveMemberAction,
+    serverAction,
     initialSaveMemberState
   );
   const [nome, setNome] = useState("");
-  const [celulaId, setCelulaId] = useState("");
+  const [selectedCelulaId, setSelectedCelulaId] = useState("");
   const [selectedPassos, setSelectedPassos] = useState<PassoTrajetoria[]>([]);
   const [isSelectorOpen, setIsSelectorOpen] = useState(false);
   const formState = state ?? initialSaveMemberState;
@@ -98,23 +70,14 @@ export function MemberForm({
   const formMessage = formState.message ?? null;
 
   const isUnavailable = Boolean(loadError) || celulas.length === 0;
+  const celulaId = isLockedToSingleCelula ? lockedCelulaId : selectedCelulaId;
   const selectedCelula = useMemo(
     () => celulas.find((celula) => celula.id === celulaId) ?? null,
     [celulaId, celulas]
   );
-  const scheduleLabel = getCelulaSchedule(selectedCelula);
-  const contextEyebrow = selectedCelula?.setor
-    ? `SETOR ${selectedCelula.setor}`
-    : "SELECAO DE CONTEXTO";
-  const contextTitle = selectedCelula?.nome ?? "Selecione uma celula";
-  const contextPrimaryChip = selectedCelula?.lideres
-    ? `Lideres: ${selectedCelula.lideres}`
-    : "Escolha uma celula para ver os lideres";
-  const contextSecondaryChip =
-    scheduleLabel || (selectedCelula ? "Horario a confirmar" : "Abra a lista para escolher");
 
   useEffect(() => {
-    if (!isSelectorOpen) {
+    if (!isSelectorOpen || isLockedToSingleCelula) {
       return undefined;
     }
 
@@ -137,7 +100,7 @@ export function MemberForm({
       document.removeEventListener("pointerdown", handlePointerDown);
       document.removeEventListener("keydown", handleKeyDown);
     };
-  }, [isSelectorOpen]);
+  }, [isLockedToSingleCelula, isSelectorOpen]);
 
   function togglePasso(passo: PassoTrajetoria) {
     setSelectedPassos((current) =>
@@ -148,7 +111,7 @@ export function MemberForm({
   }
 
   function handleSelectCelula(nextCelulaId: string) {
-    setCelulaId(nextCelulaId);
+    setSelectedCelulaId(nextCelulaId);
     setIsSelectorOpen(false);
   }
 
@@ -157,7 +120,7 @@ export function MemberForm({
       action={formAction}
       onReset={() => {
         setNome("");
-        setCelulaId("");
+        setSelectedCelulaId("");
         setSelectedPassos([]);
         setIsSelectorOpen(false);
       }}
@@ -167,113 +130,97 @@ export function MemberForm({
         <div className="relative" ref={selectorRef}>
           <input
             type="hidden"
+            name={MEMBER_FORM_FIELDS.codigoAcesso}
+            value={lockedAccessCode ?? ""}
+          />
+          <input
+            type="hidden"
             name={MEMBER_FORM_FIELDS.celulaId}
             value={celulaId}
           />
 
-          <button
-            type="button"
-            disabled={isUnavailable || pending}
-            aria-expanded={isSelectorOpen}
-            aria-haspopup="listbox"
-            aria-controls="celula-selector-options"
-            onClick={() => setIsSelectorOpen((current) => !current)}
-            className="relative w-full cursor-pointer overflow-hidden rounded-[22px] bg-white p-6 text-left transition disabled:cursor-not-allowed disabled:opacity-70"
-          >
-            <div className="flex flex-col gap-6 sm:flex-row sm:items-center">
-              <CelulaAvatar
-                celula={selectedCelula}
-                className="h-24 w-24 shrink-0"
-                imageSizes="96px"
-              />
+          {isLockedToSingleCelula && showLockedContextCard ? (
+            <CelulaContextCard
+              celula={selectedCelula}
+              accessCode={lockedAccessCode ?? ""}
+              actionHref={backHref}
+              actionLabel={backLabel}
+            />
+          ) : !isLockedToSingleCelula ? (
+            <>
+              <button
+                type="button"
+                disabled={isUnavailable || pending}
+                aria-expanded={isSelectorOpen}
+                aria-haspopup="listbox"
+                aria-controls="celula-selector-options"
+                onClick={() => setIsSelectorOpen((current) => !current)}
+                className="relative w-full cursor-pointer overflow-hidden rounded-[22px] bg-white p-6 text-left transition disabled:cursor-not-allowed disabled:opacity-70"
+              >
+                <CelulaContextContent celula={selectedCelula} />
+              </button>
 
-              <div className="min-w-0 flex-1">
-                <p className="text-xs font-bold uppercase tracking-widest text-[#3F5B93]">
-                  {contextEyebrow}
-                </p>
-                <h2 className="font-heading mt-1 text-[1.9rem] font-extrabold leading-tight tracking-[-0.04em] text-[#1A1C1F]">
-                  {contextTitle}
-                </h2>
+              {isSelectorOpen ? (
+                <div
+                  id="celula-selector-options"
+                  role="listbox"
+                  aria-label="Lista de celulas disponiveis"
+                  className="absolute inset-x-0 top-[calc(100%+12px)] z-30 rounded-[24px] border border-[#E3E8F3] bg-white p-3 shadow-[0_24px_48px_rgba(26,28,31,0.12)]"
+                >
+                  <div className="max-h-112 space-y-2 overflow-y-auto pr-1">
+                    {celulas.map((celula) => {
+                      const isSelected = celula.id === celulaId;
 
-                <div className="mt-4 flex flex-wrap gap-2.5">
-                  <span className="inline-flex items-center gap-2 rounded-full bg-[#F3F3F7] px-3 py-1.5 text-sm text-[#444750]">
-                    <LeaderChipIcon className="h-3 w-3 shrink-0" alt="" />
-                    {contextPrimaryChip}
-                  </span>
-                  <span className="inline-flex items-center gap-2 rounded-full bg-[#F3F3F7] px-3 py-1.5 text-sm text-[#444750]">
-                    <ScheduleChipIcon className="h-3.5 w-3 shrink-0" alt="" />
-                    {contextSecondaryChip}
-                  </span>
+                      return (
+                        <button
+                          key={celula.id}
+                          type="button"
+                          role="option"
+                          aria-selected={isSelected}
+                          onClick={() => handleSelectCelula(celula.id)}
+                          className={`w-full cursor-pointer rounded-[20px] border p-4 text-left transition ${
+                            isSelected
+                              ? "border-[#5974AD] bg-[#EEF3FF]"
+                              : "border-[#E7E8EE] bg-[#FBFBFE] hover:border-[#C8D3EA] hover:bg-white"
+                          }`}
+                        >
+                          <div className="flex items-start gap-4">
+                            <CelulaAvatar
+                              celula={celula}
+                              className="h-16 w-16 shrink-0"
+                              imageSizes="64px"
+                            />
+
+                            <div className="min-w-0 flex-1">
+                              <p className="text-[11px] font-bold uppercase tracking-widest text-[#3F5B93]">
+                                {celula.setor ? `SETOR ${celula.setor}` : "CELULA"}
+                              </p>
+                              <p className="font-heading mt-1 text-lg font-extrabold tracking-[-0.03em] text-[#1A1C1F]">
+                                {celula.nome}
+                              </p>
+                            </div>
+
+                            <span className="mt-1 flex h-5 w-5 shrink-0 items-center justify-center rounded-full border border-[#B8C5E0]">
+                              {isSelected ? (
+                                <span className="h-2.5 w-2.5 rounded-full bg-[#5974AD]" />
+                              ) : null}
+                            </span>
+                          </div>
+                        </button>
+                      );
+                    })}
+                  </div>
                 </div>
-              </div>
-
-              <div className="shrink-0">
-                <ContextChevronIcon
-                  className="h-10 w-10"
-                  alt=""
-                />
-              </div>
-            </div>
-          </button>
-
-          {isSelectorOpen ? (
-            <div
-              id="celula-selector-options"
-              role="listbox"
-              aria-label="Lista de celulas disponiveis"
-              className="absolute inset-x-0 top-[calc(100%+12px)] z-30 rounded-[24px] border border-[#E3E8F3] bg-white p-3 shadow-[0_24px_48px_rgba(26,28,31,0.12)]"
-            >
-              <div className="max-h-112 space-y-2 overflow-y-auto pr-1">
-                {celulas.map((celula) => {
-                  const isSelected = celula.id === celulaId;
-                  const optionSchedule =
-                    getCelulaSchedule(celula) || "Horario a confirmar";
-                  const optionLeaders = celula.lideres
-                    ? `Lideres: ${celula.lideres}`
-                    : "Lideres nao informados";
-
-                  return (
-                    <button
-                      key={celula.id}
-                      type="button"
-                      role="option"
-                      aria-selected={isSelected}
-                      onClick={() => handleSelectCelula(celula.id)}
-                      className={`w-full cursor-pointer rounded-[20px] border p-4 text-left transition ${
-                        isSelected
-                          ? "border-[#5974AD] bg-[#EEF3FF]"
-                          : "border-[#E7E8EE] bg-[#FBFBFE] hover:border-[#C8D3EA] hover:bg-white"
-                      }`}
-                    >
-                      <div className="flex items-start gap-4">
-                        <CelulaAvatar
-                          celula={celula}
-                          className="h-16 w-16 shrink-0"
-                          imageSizes="64px"
-                        />
-
-                        <div className="min-w-0 flex-1">
-                          <p className="text-[11px] font-bold uppercase tracking-widest text-[#3F5B93]">
-                            {celula.setor ? `SETOR ${celula.setor}` : "CELULA"}
-                          </p>
-                          <p className="font-heading mt-1 text-lg font-extrabold tracking-[-0.03em] text-[#1A1C1F]">
-                            {celula.nome}
-                          </p>
-                        </div>
-
-                        <span className="mt-1 flex h-5 w-5 shrink-0 items-center justify-center rounded-full border border-[#B8C5E0]">
-                          {isSelected ? (
-                            <span className="h-2.5 w-2.5 rounded-full bg-[#5974AD]" />
-                          ) : null}
-                        </span>
-                      </div>
-                    </button>
-                  );
-                })}
-              </div>
-            </div>
+              ) : null}
+            </>
           ) : null}
         </div>
+
+        {fieldErrors.codigoAcesso ? (
+          <p className="mt-3 px-1 text-sm font-medium text-rose-100">
+            {fieldErrors.codigoAcesso}
+          </p>
+        ) : null}
 
         {fieldErrors.celulaId ? (
           <p className="mt-3 px-1 text-sm font-medium text-rose-100">
@@ -302,16 +249,22 @@ export function MemberForm({
             </span>
           </div>
         </label>
+        {fieldErrors.nome ? (
+          <p className="px-1 text-sm font-medium text-rose-700">
+            {fieldErrors.nome}
+          </p>
+        ) : null}
       </section>
 
       <section className="space-y-4">
         <div className="flex items-center justify-between gap-4 px-1">
           <div>
             <h2 className="font-heading text-2xl font-extrabold tracking-[-0.03em] text-[#1A1C1F] sm:text-[1.9rem]">
-              Trajetoria de Crescimento
+              {title}
             </h2>
             <p className="mt-2 text-sm leading-6 text-[#444750]">
-              {selectedPassos.length} de {TotalPassosTrajetoria} passos marcados
+              {description ??
+                `${selectedPassos.length} de ${TotalPassosTrajetoria} passos marcados`}
             </p>
           </div>
           <span className="rounded-full bg-[#D8E2FF] px-3 py-1 text-xs font-bold uppercase tracking-[0.08em] text-[#001A42]">
@@ -355,7 +308,7 @@ export function MemberForm({
       <div className="sticky bottom-4 z-20">
         <div className="rounded-4xl bg-linear-to-t from-[#F9F9FD] via-[#F9F9FD]/92 to-transparent p-3 pt-8">
           <div className="rounded-[1.4rem] bg-white/95 p-3 shadow-[0_-4px_24px_rgba(26,28,31,0.06)] backdrop-blur">
-            <SubmitButton disabled={isUnavailable} />
+            <SubmitButton disabled={isUnavailable} label={submitLabel} />
           </div>
         </div>
       </div>
