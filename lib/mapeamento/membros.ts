@@ -43,7 +43,7 @@ type MemberRow = {
   telefone: string | null;
   data_nascimento: string | null;
   discipulador_nome: string | null;
-  serve_ministerio: boolean | null;
+  ministerios: string[] | null;
   passos_concluidos: string[] | null;
   created_at: string | null;
 };
@@ -70,10 +70,6 @@ function readOptionalTrimmedString(value: FormDataEntryValue | null) {
   return trimmed ? trimmed : null;
 }
 
-function readBooleanField(formData: FormData, fieldName: string) {
-  return formData.get(fieldName) === "true";
-}
-
 function normalizePhone(value: string | null) {
   if (!value) {
     return null;
@@ -82,6 +78,19 @@ function normalizePhone(value: string | null) {
   const digits = value.replace(/\D/g, "");
 
   return digits ? digits : null;
+}
+
+function normalizeMinisterios(value: string | null) {
+  if (!value) {
+    return [];
+  }
+
+  return [...new Set(
+    value
+      .split(/[\n,;]/)
+      .map((item) => item.trim())
+      .filter(Boolean)
+  )];
 }
 
 function isValidBirthDate(value: string | null) {
@@ -124,7 +133,7 @@ function mapMemberRowToListItem(member: MemberRow): MemberListItem {
     telefone: member.telefone,
     dataNascimento: member.data_nascimento,
     discipuladorNome: member.discipulador_nome,
-    serveMinisterio: Boolean(member.serve_ministerio),
+    ministerios: member.ministerios ?? [],
     passosConcluidos,
     createdAt: member.created_at ?? new Date(0).toISOString(),
   };
@@ -153,9 +162,8 @@ function validateMemberPayload(
   const discipuladorNome = readOptionalTrimmedString(
     formData.get(MEMBER_FORM_FIELDS.discipuladorNome)
   );
-  const serveMinisterio = readBooleanField(
-    formData,
-    MEMBER_FORM_FIELDS.serveMinisterio
+  const ministerios = normalizeMinisterios(
+    readOptionalTrimmedString(formData.get(MEMBER_FORM_FIELDS.ministerios))
   );
   const passosConcluidos = getSelectedPassos(formData);
   const fieldErrors: SaveMemberFieldErrors = {};
@@ -191,6 +199,13 @@ function validateMemberPayload(
       "Use um nome de discipulador com no maximo 120 caracteres.";
   }
 
+  const ministerioInvalido = ministerios.find((ministerio) => ministerio.length > 80);
+
+  if (ministerioInvalido) {
+    fieldErrors.ministerios =
+      "Use nomes de ministerios com no maximo 80 caracteres cada.";
+  }
+
   if (!celulaId) {
     fieldErrors.celulaId = "Selecione a celula que o membro frequenta.";
   } else if (!UUID_REGEX.test(celulaId)) {
@@ -218,7 +233,7 @@ function validateMemberPayload(
       telefone,
       dataNascimento,
       discipuladorNome,
-      serveMinisterio,
+      ministerios,
       passosConcluidos: passosConcluidos as PassoTrajetoria[],
     },
   };
@@ -302,7 +317,7 @@ export async function createMember(
         telefone: input.telefone,
         data_nascimento: input.dataNascimento,
         discipulador_nome: input.discipuladorNome,
-        serve_ministerio: input.serveMinisterio,
+        ministerios: input.ministerios,
         passos_concluidos: input.passosConcluidos,
       });
 
@@ -346,7 +361,7 @@ export async function updateMember(
         telefone: input.telefone,
         data_nascimento: input.dataNascimento,
         discipulador_nome: input.discipuladorNome,
-        serve_ministerio: input.serveMinisterio,
+        ministerios: input.ministerios,
         passos_concluidos: input.passosConcluidos,
       })
       .eq("id", input.id)
@@ -387,7 +402,7 @@ export async function loadMembersByCelulaId(
       .schema(MAPEAMENTO_SCHEMA)
       .from(MAPEAMENTO_TABLES.membros)
       .select(
-        "id, nome, celula_id, estado_civil, telefone, data_nascimento, discipulador_nome, serve_ministerio, passos_concluidos, created_at"
+        "id, nome, celula_id, estado_civil, telefone, data_nascimento, discipulador_nome, ministerios, passos_concluidos, created_at"
       )
       .eq("celula_id", celulaId)
       .order("nome", { ascending: true });
@@ -427,7 +442,7 @@ export async function loadMemberByIdAndCelulaId(
       .schema(MAPEAMENTO_SCHEMA)
       .from(MAPEAMENTO_TABLES.membros)
       .select(
-        "id, nome, celula_id, estado_civil, telefone, data_nascimento, discipulador_nome, serve_ministerio, passos_concluidos, created_at"
+        "id, nome, celula_id, estado_civil, telefone, data_nascimento, discipulador_nome, ministerios, passos_concluidos, created_at"
       )
       .eq("id", memberId)
       .eq("celula_id", celulaId)
@@ -458,7 +473,7 @@ export function mapMemberToFormValues(member: MemberListItem): MemberFormValues 
     telefone: member.telefone ?? "",
     dataNascimento: member.dataNascimento ?? "",
     discipuladorNome: member.discipuladorNome ?? "",
-    serveMinisterio: member.serveMinisterio,
+    ministerios: member.ministerios.join(", "),
     passosConcluidos: member.passosConcluidos,
   };
 }

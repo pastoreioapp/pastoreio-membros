@@ -75,7 +75,7 @@ export function MemberForm({
   const initialTelefone = initialValues?.telefone ?? "";
   const initialDataNascimento = initialValues?.dataNascimento ?? "";
   const initialDiscipuladorNome = initialValues?.discipuladorNome ?? "";
-  const initialServeMinisterio = initialValues?.serveMinisterio ?? false;
+  const initialMinisterios = initialValues?.ministerios ?? "";
   const initialPassos = initialValues?.passosConcluidos ?? [];
   const [nome, setNome] = useState(initialNome);
   const [selectedCelulaId, setSelectedCelulaId] = useState(initialCelulaId);
@@ -83,7 +83,7 @@ export function MemberForm({
   const [telefone, setTelefone] = useState(initialTelefone);
   const [dataNascimento, setDataNascimento] = useState(initialDataNascimento);
   const [discipuladorNome, setDiscipuladorNome] = useState(initialDiscipuladorNome);
-  const [serveMinisterio, setServeMinisterio] = useState(initialServeMinisterio);
+  const [ministerios, setMinisterios] = useState(initialMinisterios);
   const [selectedPassos, setSelectedPassos] = useState<PassoTrajetoria[]>(initialPassos);
   const [isSelectorOpen, setIsSelectorOpen] = useState(false);
   const formState = state ?? initialSaveMemberState;
@@ -147,7 +147,7 @@ export function MemberForm({
         setTelefone(initialTelefone);
         setDataNascimento(initialDataNascimento);
         setDiscipuladorNome(initialDiscipuladorNome);
-        setServeMinisterio(initialServeMinisterio);
+        setMinisterios(initialMinisterios);
         setSelectedPassos(initialPassos);
         setIsSelectorOpen(false);
       }}
@@ -377,27 +377,30 @@ export function MemberForm({
               </p>
             ) : null}
           </label>
-        </div>
 
-        <label className="flex cursor-pointer items-start gap-4 rounded-2xl border border-[#D8E2FF] bg-white px-4 py-4 transition hover:border-[#5974AD]">
-          <input
-            type="checkbox"
-            name={MEMBER_FORM_FIELDS.serveMinisterio}
-            value="true"
-            checked={serveMinisterio}
-            onChange={(event) => setServeMinisterio(event.target.checked)}
-            disabled={isUnavailable || pending}
-            className="mt-1 h-5 w-5 rounded border-[#B8C5E0] text-[#5974AD] focus:ring-[#5974AD] disabled:cursor-not-allowed"
-          />
-          <div>
-            <p className="text-sm font-bold text-[#1A1C1F]">
-              Serve em algum ministério
+          <label className="block sm:col-span-2">
+            <span className="mb-3 block text-sm font-bold text-[#444750]">
+              Ministérios
+            </span>
+            <textarea
+              name={MEMBER_FORM_FIELDS.ministerios}
+              value={ministerios}
+              onChange={(event) => setMinisterios(event.target.value)}
+              disabled={isUnavailable || pending}
+              placeholder="Ex.: Louvor, Intercessao, Midia"
+              rows={3}
+              className="w-full rounded-xl border-2 border-transparent bg-[#E2E2E6] px-5 py-4 text-base font-medium text-[#1A1C1F] outline-none transition placeholder:text-[#444750]/40 focus:border-[#5974AD] focus:bg-white disabled:cursor-not-allowed disabled:opacity-70"
+            />
+            <p className="mt-2 px-1 text-sm leading-6 text-[#5C6070]">
+              Informe um ou mais ministérios separados por vírgula, ponto e vírgula ou quebra de linha.
             </p>
-            <p className="mt-1 text-sm leading-6 text-[#5C6070]">
-              Marque esta opção se o membro já participa ativamente de algum ministério.
-            </p>
-          </div>
-        </label>
+            {fieldErrors.ministerios ? (
+              <p className="px-1 pt-2 text-sm font-medium text-rose-700">
+                {fieldErrors.ministerios}
+              </p>
+            ) : null}
+          </label>
+        </div>
       </section>
 
       <section className="space-y-4">

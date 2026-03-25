@@ -192,10 +192,23 @@ export function MemberTrajectorySheet({
 
                 <div className="rounded-2xl border border-[#E6E8EF] bg-white px-4 py-3 sm:col-span-2">
                   <dt className="text-xs font-bold uppercase tracking-[0.08em] text-[#5C6070]">
-                    Serve em ministerio
+                    Ministerios
                   </dt>
-                  <dd className="mt-1 text-[15px] font-medium leading-6 text-[#1A1C1F]">
-                    {member.serveMinisterio ? "Sim" : "Nao"}
+                  <dd className="mt-2 flex flex-wrap gap-2">
+                    {member.ministerios.length > 0 ? (
+                      member.ministerios.map((ministerio) => (
+                        <span
+                          key={ministerio}
+                          className="inline-flex rounded-full bg-[#EEF8F1] px-3 py-1.5 text-xs font-semibold text-[#11643A]"
+                        >
+                          {ministerio}
+                        </span>
+                      ))
+                    ) : (
+                      <span className="text-[15px] font-medium leading-6 text-[#1A1C1F]">
+                        Nao informado
+                      </span>
+                    )}
                   </dd>
                 </div>
               </dl>

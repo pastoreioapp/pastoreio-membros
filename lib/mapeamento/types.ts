@@ -29,7 +29,7 @@ export type MemberListItem = {
   telefone: string | null;
   dataNascimento: string | null;
   discipuladorNome: string | null;
-  serveMinisterio: boolean;
+  ministerios: string[];
   passosConcluidos: PassoTrajetoria[];
   createdAt: string;
 };
@@ -43,6 +43,7 @@ export type SaveMemberFieldErrors = {
   telefone?: string;
   dataNascimento?: string;
   discipuladorNome?: string;
+  ministerios?: string;
   passos?: string;
 };
 
@@ -65,7 +66,7 @@ export type CreateMemberInput = {
   telefone: string | null;
   dataNascimento: string | null;
   discipuladorNome: string | null;
-  serveMinisterio: boolean;
+  ministerios: string[];
   passosConcluidos: PassoTrajetoria[];
 };
 
@@ -81,6 +82,6 @@ export type MemberFormValues = {
   telefone: string;
   dataNascimento: string;
   discipuladorNome: string;
-  serveMinisterio: boolean;
+  ministerios: string;
   passosConcluidos: PassoTrajetoria[];
 };

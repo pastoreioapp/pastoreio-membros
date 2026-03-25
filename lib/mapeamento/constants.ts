@@ -12,7 +12,7 @@ export const MEMBER_FORM_FIELDS = {
   telefone: "telefone",
   dataNascimento: "data_nascimento",
   discipuladorNome: "discipulador_nome",
-  serveMinisterio: "serve_ministerio",
+  ministerios: "ministerios",
   celulaId: "celula_id",
   passosConcluidos: "passos_concluidos",
   codigoAcesso: "codigo_acesso",

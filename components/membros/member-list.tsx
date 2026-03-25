@@ -128,11 +128,14 @@ export function MemberList({ accessCode, celula, members }: MemberListProps) {
                             {member.estadoCivil}
                           </span>
                         ) : null}
-                        {member.serveMinisterio ? (
-                          <span className="inline-flex rounded-full bg-[#EEF8F1] px-3 py-1.5 text-xs font-semibold text-[#11643A]">
-                            Serve em ministério
+                        {member.ministerios.map((ministerio) => (
+                          <span
+                            key={ministerio}
+                            className="inline-flex rounded-full bg-[#EEF8F1] px-3 py-1.5 text-xs font-semibold text-[#11643A]"
+                          >
+                            {ministerio}
                           </span>
-                        ) : null}
+                        ))}
                       </div>
                     </div>
 
