@@ -10,10 +10,7 @@ export function MemberSelfRegisterShare({
   href,
 }: MemberSelfRegisterShareProps) {
   const [copied, setCopied] = useState(false);
-  const shareUrl =
-    typeof window === "undefined"
-      ? href
-      : new URL(href, window.location.origin).toString();
+  const shareUrl = href;
 
   async function handleCopyLink() {
     try {

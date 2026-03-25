@@ -123,7 +123,7 @@ export function MemberList({ accessCode, celula, members }: MemberListProps) {
 
                   <div className="mt-5 flex flex-wrap gap-2">
                     {member.passosConcluidos.length > 0 ? (
-                      member.passosConcluidos.slice(0, 4).map((step) => (
+                      member.passosConcluidos.map((step) => (
                         <span
                           key={step}
                           className="inline-flex rounded-full bg-[#EEF3FF] px-3 py-1.5 text-xs font-semibold text-[#17305E]"
@@ -136,12 +136,6 @@ export function MemberList({ accessCode, celula, members }: MemberListProps) {
                         Nenhum passo marcado ainda
                       </span>
                     )}
-
-                    {member.passosConcluidos.length > 4 ? (
-                      <span className="inline-flex rounded-full bg-[#F4F4F6] px-3 py-1.5 text-xs font-semibold text-[#5C6070]">
-                        +{member.passosConcluidos.length - 4} passos
-                      </span>
-                    ) : null}
                   </div>
 
                   <div className="mt-5 flex flex-wrap gap-3">

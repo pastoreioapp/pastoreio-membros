@@ -279,9 +279,13 @@ export function MemberForm({
             <h2 className="font-heading text-2xl font-extrabold tracking-[-0.03em] text-[#1A1C1F] sm:text-[1.9rem]">
               {title}
             </h2>
+            {description ? (
+              <p className="mt-2 text-sm leading-6 text-[#444750]">
+                {description}
+              </p>
+            ) : null}
             <p className="mt-2 text-sm leading-6 text-[#444750]">
-              {description ??
-                `${selectedPassos.length} de ${TotalPassosTrajetoria} passos marcados`}
+              {selectedPassos.length} de {TotalPassosTrajetoria} passos marcados
             </p>
           </div>
           <span className="rounded-full bg-[#D8E2FF] px-3 py-1 text-xs font-bold uppercase tracking-[0.08em] text-[#001A42]">
@@ -297,6 +301,15 @@ export function MemberForm({
             selectedPassos={selectedPassos}
             onTogglePasso={togglePasso}
             defaultOpen={index === 0}
+          />
+        ))}
+
+        {selectedPassos.map((passo) => (
+          <input
+            key={passo}
+            type="hidden"
+            name={MEMBER_FORM_FIELDS.passosConcluidos}
+            value={passo}
           />
         ))}
 

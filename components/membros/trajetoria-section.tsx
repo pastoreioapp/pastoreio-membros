@@ -12,7 +12,6 @@ import {
   PastoreioOneIcon,
   PastoreioTwoIcon,
 } from "@/components/membros/member-form-icons";
-import { MEMBER_FORM_FIELDS } from "@/lib/mapeamento/constants";
 
 type TrajetoriaSectionProps = {
   categoria: CategoriaTrajetoria;
@@ -69,22 +68,17 @@ export function TrajetoriaSection({
             const checked = selectedPassos.includes(passo);
 
             return (
-              <label
+              <button
                 key={passo}
-                className={`flex min-h-14 cursor-pointer items-center gap-4 rounded-xl border px-4 py-4 text-left transition ${
+                type="button"
+                aria-pressed={checked}
+                onClick={() => onTogglePasso(passo)}
+                className={`flex min-h-14 w-full cursor-pointer items-center gap-4 rounded-xl border px-4 py-4 text-left transition ${
                   checked
                     ? "border-[#5974AD] bg-[#EEF3FF]"
                     : "border-[#E2E2E6] bg-white hover:border-[#CAD3E4]"
                 }`}
               >
-                <input
-                  type="checkbox"
-                  name={MEMBER_FORM_FIELDS.passosConcluidos}
-                  value={passo}
-                  checked={checked}
-                  onChange={() => onTogglePasso(passo)}
-                  className="sr-only"
-                />
                 <span
                   className={`flex h-6 w-6 shrink-0 items-center justify-center rounded-lg border-2 ${
                     checked
@@ -97,7 +91,7 @@ export function TrajetoriaSection({
                 <span className="text-[15px] font-medium leading-6 text-[#1A1C1F]">
                   {passo}
                 </span>
-              </label>
+              </button>
             );
           })}
         </div>
