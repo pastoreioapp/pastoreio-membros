@@ -8,6 +8,11 @@ export const MAPEAMENTO_TABLES = {
 export const MEMBER_FORM_FIELDS = {
   id: "id",
   nome: "nome",
+  estadoCivil: "estado_civil",
+  telefone: "telefone",
+  dataNascimento: "data_nascimento",
+  discipuladorNome: "discipulador_nome",
+  serveMinisterio: "serve_ministerio",
   celulaId: "celula_id",
   passosConcluidos: "passos_concluidos",
   codigoAcesso: "codigo_acesso",

@@ -27,6 +27,22 @@ function formatCreatedAt(value: string) {
   }).format(new Date(value));
 }
 
+function formatPhone(value: string | null) {
+  if (!value) {
+    return null;
+  }
+
+  if (value.length === 11) {
+    return `(${value.slice(0, 2)}) ${value.slice(2, 7)}-${value.slice(7)}`;
+  }
+
+  if (value.length === 10) {
+    return `(${value.slice(0, 2)}) ${value.slice(2, 6)}-${value.slice(6)}`;
+  }
+
+  return value;
+}
+
 export function MemberList({ accessCode, celula, members }: MemberListProps) {
   const [expandedMemberId, setExpandedMemberId] = useState<string | null>(null);
   const expandedMember = useMemo(
@@ -101,6 +117,23 @@ export function MemberList({ accessCode, celula, members }: MemberListProps) {
                       <p className="mt-2 text-sm text-[#5C6070]">
                         Cadastrado em {formatCreatedAt(member.createdAt)}
                       </p>
+                      <div className="mt-3 flex flex-wrap gap-2">
+                        {member.telefone ? (
+                          <span className="inline-flex rounded-full bg-[#F4F6FB] px-3 py-1.5 text-xs font-semibold text-[#444750]">
+                            {formatPhone(member.telefone)}
+                          </span>
+                        ) : null}
+                        {member.estadoCivil ? (
+                          <span className="inline-flex rounded-full bg-[#F4F6FB] px-3 py-1.5 text-xs font-semibold text-[#444750]">
+                            {member.estadoCivil}
+                          </span>
+                        ) : null}
+                        {member.serveMinisterio ? (
+                          <span className="inline-flex rounded-full bg-[#EEF8F1] px-3 py-1.5 text-xs font-semibold text-[#11643A]">
+                            Serve em ministério
+                          </span>
+                        ) : null}
+                      </div>
                     </div>
 
                     <div className="rounded-2xl bg-[#F3F6FD] px-4 py-3 text-sm font-semibold text-[#17305E]">

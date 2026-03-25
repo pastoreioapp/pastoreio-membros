@@ -25,6 +25,11 @@ export type MemberListItem = {
   id: string;
   nome: string;
   celulaId: string | null;
+  estadoCivil: string | null;
+  telefone: string | null;
+  dataNascimento: string | null;
+  discipuladorNome: string | null;
+  serveMinisterio: boolean;
   passosConcluidos: PassoTrajetoria[];
   createdAt: string;
 };
@@ -34,6 +39,10 @@ export type SaveMemberFieldErrors = {
   codigoAcesso?: string;
   nome?: string;
   celulaId?: string;
+  estadoCivil?: string;
+  telefone?: string;
+  dataNascimento?: string;
+  discipuladorNome?: string;
   passos?: string;
 };
 
@@ -52,6 +61,11 @@ export const initialSaveMemberState: SaveMemberState = {
 export type CreateMemberInput = {
   nome: string;
   celulaId: string;
+  estadoCivil: string | null;
+  telefone: string | null;
+  dataNascimento: string | null;
+  discipuladorNome: string | null;
+  serveMinisterio: boolean;
   passosConcluidos: PassoTrajetoria[];
 };
 
@@ -63,5 +77,10 @@ export type MemberFormValues = {
   id?: string;
   nome: string;
   celulaId: string;
+  estadoCivil: string;
+  telefone: string;
+  dataNascimento: string;
+  discipuladorNome: string;
+  serveMinisterio: boolean;
   passosConcluidos: PassoTrajetoria[];
 };

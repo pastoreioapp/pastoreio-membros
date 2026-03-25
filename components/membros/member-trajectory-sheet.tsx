@@ -18,6 +18,36 @@ type MemberTrajectorySheetProps = {
   onClose: () => void;
 };
 
+function formatPhone(value: string | null) {
+  if (!value) {
+    return "Nao informado";
+  }
+
+  const digits = value.replace(/\D/g, "");
+
+  if (digits.length === 11) {
+    return `(${digits.slice(0, 2)}) ${digits.slice(2, 7)}-${digits.slice(7)}`;
+  }
+
+  if (digits.length === 10) {
+    return `(${digits.slice(0, 2)}) ${digits.slice(2, 6)}-${digits.slice(6)}`;
+  }
+
+  return value;
+}
+
+function formatBirthDate(value: string | null) {
+  if (!value) {
+    return "Nao informada";
+  }
+
+  return new Intl.DateTimeFormat("pt-BR", {
+    day: "2-digit",
+    month: "2-digit",
+    year: "numeric",
+  }).format(new Date(`${value}T00:00:00.000Z`));
+}
+
 function isStepCompleted(
   selectedSteps: PassoTrajetoria[],
   step: PassoTrajetoria
@@ -107,6 +137,70 @@ export function MemberTrajectorySheet({
 
         <div className="max-h-[calc(88vh-132px)] overflow-y-auto px-5 py-5 sm:px-6">
           <div className="space-y-4">
+            <section className="rounded-[28px] border border-[#E5E9F2] bg-[#FBFCFE] p-4 sm:p-5">
+              <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+                <div>
+                  <h3 className="font-heading text-xl font-extrabold tracking-[-0.03em] text-[#1A1C1F]">
+                    Dados do membro
+                  </h3>
+                  <p className="mt-1 text-sm leading-6 text-[#5C6070]">
+                    Informacoes pessoais registradas no cadastro.
+                  </p>
+                </div>
+
+                <span className="inline-flex rounded-full bg-[#EEF3FF] px-3 py-1.5 text-xs font-bold uppercase tracking-[0.08em] text-[#17305E]">
+                  Perfil
+                </span>
+              </div>
+
+              <dl className="mt-4 grid gap-3 sm:grid-cols-2">
+                <div className="rounded-2xl border border-[#E6E8EF] bg-white px-4 py-3">
+                  <dt className="text-xs font-bold uppercase tracking-[0.08em] text-[#5C6070]">
+                    Estado civil
+                  </dt>
+                  <dd className="mt-1 text-[15px] font-medium leading-6 text-[#1A1C1F]">
+                    {member.estadoCivil ?? "Nao informado"}
+                  </dd>
+                </div>
+
+                <div className="rounded-2xl border border-[#E6E8EF] bg-white px-4 py-3">
+                  <dt className="text-xs font-bold uppercase tracking-[0.08em] text-[#5C6070]">
+                    Telefone
+                  </dt>
+                  <dd className="mt-1 text-[15px] font-medium leading-6 text-[#1A1C1F]">
+                    {formatPhone(member.telefone)}
+                  </dd>
+                </div>
+
+                <div className="rounded-2xl border border-[#E6E8EF] bg-white px-4 py-3">
+                  <dt className="text-xs font-bold uppercase tracking-[0.08em] text-[#5C6070]">
+                    Data de nascimento
+                  </dt>
+                  <dd className="mt-1 text-[15px] font-medium leading-6 text-[#1A1C1F]">
+                    {formatBirthDate(member.dataNascimento)}
+                  </dd>
+                </div>
+
+                <div className="rounded-2xl border border-[#E6E8EF] bg-white px-4 py-3">
+                  <dt className="text-xs font-bold uppercase tracking-[0.08em] text-[#5C6070]">
+                    Discipulador
+                  </dt>
+                  <dd className="mt-1 text-[15px] font-medium leading-6 text-[#1A1C1F]">
+                    {member.discipuladorNome ?? "Nao informado"}
+                  </dd>
+                </div>
+
+                <div className="rounded-2xl border border-[#E6E8EF] bg-white px-4 py-3 sm:col-span-2">
+                  <dt className="text-xs font-bold uppercase tracking-[0.08em] text-[#5C6070]">
+                    Serve em ministerio
+                  </dt>
+                  <dd className="mt-1 text-[15px] font-medium leading-6 text-[#1A1C1F]">
+                    {member.serveMinisterio ? "Sim" : "Nao"}
+                  </dd>
+                </div>
+              </dl>
+            </section>
+
             {CategoriasTrajetoriaEntries.map(([categoria, passos]) => {
               const completedCount = passos.filter((step) =>
                 isStepCompleted(member.passosConcluidos, step)

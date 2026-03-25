@@ -71,9 +71,19 @@ export function MemberForm({
   );
   const initialNome = initialValues?.nome ?? "";
   const initialCelulaId = initialValues?.celulaId ?? "";
+  const initialEstadoCivil = initialValues?.estadoCivil ?? "";
+  const initialTelefone = initialValues?.telefone ?? "";
+  const initialDataNascimento = initialValues?.dataNascimento ?? "";
+  const initialDiscipuladorNome = initialValues?.discipuladorNome ?? "";
+  const initialServeMinisterio = initialValues?.serveMinisterio ?? false;
   const initialPassos = initialValues?.passosConcluidos ?? [];
   const [nome, setNome] = useState(initialNome);
   const [selectedCelulaId, setSelectedCelulaId] = useState(initialCelulaId);
+  const [estadoCivil, setEstadoCivil] = useState(initialEstadoCivil);
+  const [telefone, setTelefone] = useState(initialTelefone);
+  const [dataNascimento, setDataNascimento] = useState(initialDataNascimento);
+  const [discipuladorNome, setDiscipuladorNome] = useState(initialDiscipuladorNome);
+  const [serveMinisterio, setServeMinisterio] = useState(initialServeMinisterio);
   const [selectedPassos, setSelectedPassos] = useState<PassoTrajetoria[]>(initialPassos);
   const [isSelectorOpen, setIsSelectorOpen] = useState(false);
   const formState = state ?? initialSaveMemberState;
@@ -133,6 +143,11 @@ export function MemberForm({
       onReset={() => {
         setNome(initialNome);
         setSelectedCelulaId(initialCelulaId);
+        setEstadoCivil(initialEstadoCivil);
+        setTelefone(initialTelefone);
+        setDataNascimento(initialDataNascimento);
+        setDiscipuladorNome(initialDiscipuladorNome);
+        setServeMinisterio(initialServeMinisterio);
         setSelectedPassos(initialPassos);
         setIsSelectorOpen(false);
       }}
@@ -271,6 +286,118 @@ export function MemberForm({
             {fieldErrors.nome}
           </p>
         ) : null}
+      </section>
+
+      <section className="space-y-5">
+        <div className="px-1">
+          <h2 className="font-heading text-2xl font-extrabold tracking-[-0.03em] text-[#1A1C1F] sm:text-[1.9rem]">
+            Dados do membro
+          </h2>
+          <p className="mt-2 text-sm leading-6 text-[#444750]">
+            Registre as informações pessoais para facilitar o acompanhamento desta pessoa.
+          </p>
+        </div>
+
+        <div className="grid gap-4 sm:grid-cols-2">
+          <label className="block">
+            <span className="mb-3 block text-sm font-bold text-[#444750]">
+              Estado civil
+            </span>
+            <input
+              type="text"
+              name={MEMBER_FORM_FIELDS.estadoCivil}
+              value={estadoCivil}
+              onChange={(event) => setEstadoCivil(event.target.value)}
+              disabled={isUnavailable || pending}
+              placeholder="Ex.: Solteiro(a)"
+              className="min-h-14 w-full rounded-xl border-2 border-transparent bg-[#E2E2E6] px-5 text-base font-medium text-[#1A1C1F] outline-none transition placeholder:text-[#444750]/40 focus:border-[#5974AD] focus:bg-white disabled:cursor-not-allowed disabled:opacity-70"
+            />
+            {fieldErrors.estadoCivil ? (
+              <p className="px-1 pt-2 text-sm font-medium text-rose-700">
+                {fieldErrors.estadoCivil}
+              </p>
+            ) : null}
+          </label>
+
+          <label className="block">
+            <span className="mb-3 block text-sm font-bold text-[#444750]">
+              Telefone
+            </span>
+            <input
+              type="tel"
+              name={MEMBER_FORM_FIELDS.telefone}
+              value={telefone}
+              onChange={(event) => setTelefone(event.target.value)}
+              disabled={isUnavailable || pending}
+              placeholder="(00) 00000-0000"
+              className="min-h-14 w-full rounded-xl border-2 border-transparent bg-[#E2E2E6] px-5 text-base font-medium text-[#1A1C1F] outline-none transition placeholder:text-[#444750]/40 focus:border-[#5974AD] focus:bg-white disabled:cursor-not-allowed disabled:opacity-70"
+            />
+            {fieldErrors.telefone ? (
+              <p className="px-1 pt-2 text-sm font-medium text-rose-700">
+                {fieldErrors.telefone}
+              </p>
+            ) : null}
+          </label>
+
+          <label className="block">
+            <span className="mb-3 block text-sm font-bold text-[#444750]">
+              Data de nascimento
+            </span>
+            <input
+              type="date"
+              name={MEMBER_FORM_FIELDS.dataNascimento}
+              value={dataNascimento}
+              onChange={(event) => setDataNascimento(event.target.value)}
+              disabled={isUnavailable || pending}
+              className="min-h-14 w-full rounded-xl border-2 border-transparent bg-[#E2E2E6] px-5 text-base font-medium text-[#1A1C1F] outline-none transition focus:border-[#5974AD] focus:bg-white disabled:cursor-not-allowed disabled:opacity-70"
+            />
+            {fieldErrors.dataNascimento ? (
+              <p className="px-1 pt-2 text-sm font-medium text-rose-700">
+                {fieldErrors.dataNascimento}
+              </p>
+            ) : null}
+          </label>
+
+          <label className="block">
+            <span className="mb-3 block text-sm font-bold text-[#444750]">
+              Discipulador
+            </span>
+            <input
+              type="text"
+              name={MEMBER_FORM_FIELDS.discipuladorNome}
+              value={discipuladorNome}
+              onChange={(event) => setDiscipuladorNome(event.target.value)}
+              disabled={isUnavailable || pending}
+              placeholder="Nome de quem discipula"
+              className="min-h-14 w-full rounded-xl border-2 border-transparent bg-[#E2E2E6] px-5 text-base font-medium text-[#1A1C1F] outline-none transition placeholder:text-[#444750]/40 focus:border-[#5974AD] focus:bg-white disabled:cursor-not-allowed disabled:opacity-70"
+            />
+            {fieldErrors.discipuladorNome ? (
+              <p className="px-1 pt-2 text-sm font-medium text-rose-700">
+                {fieldErrors.discipuladorNome}
+              </p>
+            ) : null}
+          </label>
+        </div>
+
+        <label className="flex cursor-pointer items-start gap-4 rounded-2xl border border-[#D8E2FF] bg-white px-4 py-4 transition hover:border-[#5974AD]">
+          <input
+            type="checkbox"
+            name={MEMBER_FORM_FIELDS.serveMinisterio}
+            value="true"
+            checked={serveMinisterio}
+            onChange={(event) => setServeMinisterio(event.target.checked)}
+            disabled={isUnavailable || pending}
+            className="mt-1 h-5 w-5 rounded border-[#B8C5E0] text-[#5974AD] focus:ring-[#5974AD] disabled:cursor-not-allowed"
+          />
+          <div>
+            <p className="text-sm font-bold text-[#1A1C1F]">
+              Serve em algum ministério
+            </p>
+            <p className="mt-1 text-sm leading-6 text-[#5C6070]">
+              Marque esta opção se o membro já participa ativamente de algum ministério.
+            </p>
+          </div>
+        </label>
       </section>
 
       <section className="space-y-4">

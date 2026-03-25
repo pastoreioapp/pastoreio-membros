@@ -39,6 +39,11 @@ type MemberRow = {
   id: string;
   nome: string;
   celula_id: string | null;
+  estado_civil: string | null;
+  telefone: string | null;
+  data_nascimento: string | null;
+  discipulador_nome: string | null;
+  serve_ministerio: boolean | null;
   passos_concluidos: string[] | null;
   created_at: string | null;
 };
@@ -60,6 +65,43 @@ function readTrimmedString(value: FormDataEntryValue | null) {
   return typeof value === "string" ? value.trim() : "";
 }
 
+function readOptionalTrimmedString(value: FormDataEntryValue | null) {
+  const trimmed = readTrimmedString(value);
+  return trimmed ? trimmed : null;
+}
+
+function readBooleanField(formData: FormData, fieldName: string) {
+  return formData.get(fieldName) === "true";
+}
+
+function normalizePhone(value: string | null) {
+  if (!value) {
+    return null;
+  }
+
+  const digits = value.replace(/\D/g, "");
+
+  return digits ? digits : null;
+}
+
+function isValidBirthDate(value: string | null) {
+  if (!value) {
+    return true;
+  }
+
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(value)) {
+    return false;
+  }
+
+  const parsed = new Date(`${value}T00:00:00.000Z`);
+
+  if (Number.isNaN(parsed.getTime())) {
+    return false;
+  }
+
+  return parsed.toISOString().slice(0, 10) === value;
+}
+
 function getSelectedPassos(formData: FormData) {
   const selected = formData
     .getAll(MEMBER_FORM_FIELDS.passosConcluidos)
@@ -78,6 +120,11 @@ function mapMemberRowToListItem(member: MemberRow): MemberListItem {
     id: member.id,
     nome: member.nome,
     celulaId: member.celula_id,
+    estadoCivil: member.estado_civil,
+    telefone: member.telefone,
+    dataNascimento: member.data_nascimento,
+    discipuladorNome: member.discipulador_nome,
+    serveMinisterio: Boolean(member.serve_ministerio),
     passosConcluidos,
     createdAt: member.created_at ?? new Date(0).toISOString(),
   };
@@ -94,6 +141,22 @@ function validateMemberPayload(
   );
   const nome = readTrimmedString(formData.get(MEMBER_FORM_FIELDS.nome));
   const celulaId = readTrimmedString(formData.get(MEMBER_FORM_FIELDS.celulaId));
+  const estadoCivil = readOptionalTrimmedString(
+    formData.get(MEMBER_FORM_FIELDS.estadoCivil)
+  );
+  const telefone = normalizePhone(
+    readOptionalTrimmedString(formData.get(MEMBER_FORM_FIELDS.telefone))
+  );
+  const dataNascimento = readOptionalTrimmedString(
+    formData.get(MEMBER_FORM_FIELDS.dataNascimento)
+  );
+  const discipuladorNome = readOptionalTrimmedString(
+    formData.get(MEMBER_FORM_FIELDS.discipuladorNome)
+  );
+  const serveMinisterio = readBooleanField(
+    formData,
+    MEMBER_FORM_FIELDS.serveMinisterio
+  );
   const passosConcluidos = getSelectedPassos(formData);
   const fieldErrors: SaveMemberFieldErrors = {};
   const resolvedAccess = resolveCelulaAccess(codigoAcesso);
@@ -109,6 +172,23 @@ function validateMemberPayload(
     fieldErrors.nome = "Informe o nome do membro.";
   } else if (nome.length > 120) {
     fieldErrors.nome = "Use um nome com no maximo 120 caracteres.";
+  }
+
+  if (estadoCivil && estadoCivil.length > 60) {
+    fieldErrors.estadoCivil = "Use um estado civil com no maximo 60 caracteres.";
+  }
+
+  if (telefone && (telefone.length < 10 || telefone.length > 11)) {
+    fieldErrors.telefone = "Informe um telefone com DDD valido.";
+  }
+
+  if (!isValidBirthDate(dataNascimento)) {
+    fieldErrors.dataNascimento = "Informe uma data de nascimento valida.";
+  }
+
+  if (discipuladorNome && discipuladorNome.length > 120) {
+    fieldErrors.discipuladorNome =
+      "Use um nome de discipulador com no maximo 120 caracteres.";
   }
 
   if (!celulaId) {
@@ -134,6 +214,11 @@ function validateMemberPayload(
     payload: {
       nome,
       celulaId,
+      estadoCivil,
+      telefone,
+      dataNascimento,
+      discipuladorNome,
+      serveMinisterio,
       passosConcluidos: passosConcluidos as PassoTrajetoria[],
     },
   };
@@ -213,6 +298,11 @@ export async function createMember(
       .insert({
         nome: input.nome,
         celula_id: input.celulaId,
+        estado_civil: input.estadoCivil,
+        telefone: input.telefone,
+        data_nascimento: input.dataNascimento,
+        discipulador_nome: input.discipuladorNome,
+        serve_ministerio: input.serveMinisterio,
         passos_concluidos: input.passosConcluidos,
       });
 
@@ -252,6 +342,11 @@ export async function updateMember(
       .update({
         nome: input.nome,
         celula_id: input.celulaId,
+        estado_civil: input.estadoCivil,
+        telefone: input.telefone,
+        data_nascimento: input.dataNascimento,
+        discipulador_nome: input.discipuladorNome,
+        serve_ministerio: input.serveMinisterio,
         passos_concluidos: input.passosConcluidos,
       })
       .eq("id", input.id)
@@ -291,7 +386,9 @@ export async function loadMembersByCelulaId(
     const { data, error } = await supabase
       .schema(MAPEAMENTO_SCHEMA)
       .from(MAPEAMENTO_TABLES.membros)
-      .select("id, nome, celula_id, passos_concluidos, created_at")
+      .select(
+        "id, nome, celula_id, estado_civil, telefone, data_nascimento, discipulador_nome, serve_ministerio, passos_concluidos, created_at"
+      )
       .eq("celula_id", celulaId)
       .order("nome", { ascending: true });
 
@@ -329,7 +426,9 @@ export async function loadMemberByIdAndCelulaId(
     const { data, error } = await supabase
       .schema(MAPEAMENTO_SCHEMA)
       .from(MAPEAMENTO_TABLES.membros)
-      .select("id, nome, celula_id, passos_concluidos, created_at")
+      .select(
+        "id, nome, celula_id, estado_civil, telefone, data_nascimento, discipulador_nome, serve_ministerio, passos_concluidos, created_at"
+      )
       .eq("id", memberId)
       .eq("celula_id", celulaId)
       .maybeSingle();
@@ -355,6 +454,11 @@ export function mapMemberToFormValues(member: MemberListItem): MemberFormValues 
     id: member.id,
     nome: member.nome,
     celulaId: member.celulaId ?? "",
+    estadoCivil: member.estadoCivil ?? "",
+    telefone: member.telefone ?? "",
+    dataNascimento: member.dataNascimento ?? "",
+    discipuladorNome: member.discipuladorNome ?? "",
+    serveMinisterio: member.serveMinisterio,
     passosConcluidos: member.passosConcluidos,
   };
 }
