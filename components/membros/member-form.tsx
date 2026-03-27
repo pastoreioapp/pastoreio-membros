@@ -144,7 +144,7 @@ export function MemberForm({
         fieldErrors={fieldErrors}
       />
 
-      <section className="space-y-3">
+      <section className="space-y-3 mt-10">
         <label className="block">
           <span className="mb-3 block text-sm font-bold text-[#444750]">
             {nameLabel}

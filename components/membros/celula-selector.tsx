@@ -73,6 +73,10 @@ export function CelulaSelector({
     setIsSelectorOpen(false);
   }
 
+  if (isLockedToSingleCelula && !showLockedContextCard) {
+    return null;
+  }
+
   return (
     <section className="rounded-[24px] bg-[#5974AD] p-1 shadow-[0_1px_2px_rgba(0,0,0,0.05)]">
       <div className="relative" ref={selectorRef}>

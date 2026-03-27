@@ -2,6 +2,7 @@ import Image from "next/image";
 import { notFound } from "next/navigation";
 
 import { saveSelfRegisterMemberAction } from "@/app/actions/membros";
+import { CelulaAvatar } from "@/components/membros/celula-context";
 import { MemberForm } from "@/components/membros/member-form";
 import { resolveLeaderRouteAccess } from "@/lib/mapeamento/rotas";
 
@@ -36,17 +37,30 @@ export default async function MemberSelfRegistrationPage({
 
       <div className="mx-auto w-full max-w-[816px] px-4 py-8 sm:px-6 sm:py-10">
         <section className="space-y-5">
-          <div className="rounded-[28px] bg-white p-5 shadow-[0_18px_50px_rgba(26,28,31,0.08)] sm:p-6">
-            <span className="inline-flex rounded-full bg-[#D8E2FF] px-3 py-1 text-xs font-bold uppercase tracking-[0.12em] text-[#17305E]">
-              Auto-cadastro
-            </span>
-            <h1 className="font-heading mt-3 text-3xl font-extrabold tracking-[-0.04em] text-[#1A1C1F]">
-              Complete seu cadastro em {access.celula.nome}
-            </h1>
-            <p className="mt-2 text-sm leading-6 text-[#444750]">
-              Informe seus dados para entrar no mapeamento desta célula. A célula já está definida neste link e não pode ser alterada.
-            </p>
-          </div>
+          <section className="relative overflow-hidden rounded-[24px] bg-linear-to-br from-[#2D4E8A] via-[#3F5B93] to-[#6B8AC4] shadow-[0_18px_50px_rgba(23,48,94,0.18)]">
+            <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,rgba(255,255,255,0.10),transparent_60%)]" />
+            <div className="relative p-6">
+              <span className="inline-flex rounded-full border border-white/15 bg-white/10 px-3 py-1 text-xs font-bold uppercase tracking-[0.12em] text-white/90 backdrop-blur-sm">
+                Auto-cadastro
+              </span>
+
+              <div className="mt-4 flex flex-col gap-5 sm:flex-row sm:items-center">
+                <CelulaAvatar
+                  celula={access.celula}
+                  className="h-20 w-20 shrink-0"
+                  imageSizes="80px"
+                />
+                <div className="min-w-0 flex-1">
+                  <h1 className="font-heading text-[1.75rem] font-extrabold leading-tight tracking-[-0.04em] text-white">
+                    Complete seu cadastro em {access.celula.nome}
+                  </h1>
+                  <p className="mt-2 text-sm leading-6 text-white/70">
+                    Informe seus dados para entrar no mapeamento desta célula. A célula já está definida neste link e não pode ser alterada.
+                  </p>
+                </div>
+              </div>
+            </div>
+          </section>
 
           <MemberForm
             celulas={[access.celula]}

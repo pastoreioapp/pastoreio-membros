@@ -78,7 +78,7 @@ export function CelulaContextCard({
   accessCode,
   actionHref,
   actionLabel,
-  badgeLabel = "Celula liberada por codigo",
+  badgeLabel = "Central da célula",
 }: CelulaContextCardProps) {
   const scheduleLabel = getCelulaSchedule(celula);
   const contextEyebrow = celula?.setor ? `SETOR ${celula.setor}` : "CELULA";
@@ -89,16 +89,18 @@ export function CelulaContextCard({
   const contextSecondaryChip = scheduleLabel || "Horario a confirmar";
 
   return (
-    <section className="rounded-[24px] bg-[#5974AD] p-1 shadow-[0_1px_2px_rgba(0,0,0,0.05)]">
-      <div className="overflow-hidden rounded-[22px] bg-white p-6">
-        <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
-          <span className="inline-flex rounded-full bg-[#D8E2FF] px-3 py-1 text-xs font-bold uppercase tracking-[0.12em] text-[#17305E]">
+    <section className="relative overflow-hidden rounded-[24px] bg-linear-to-br from-[#2D4E8A] via-[#3F5B93] to-[#6B8AC4] shadow-[0_18px_50px_rgba(23,48,94,0.18)]">
+      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,rgba(255,255,255,0.10),transparent_60%)]" />
+
+      <div className="relative p-6">
+        <div className="mb-5 flex flex-wrap items-center justify-between gap-3">
+          <span className="inline-flex rounded-full border border-white/15 bg-white/10 px-3 py-1 text-xs font-bold uppercase tracking-[0.12em] text-white/90 backdrop-blur-sm">
             {badgeLabel}
           </span>
           {actionHref && actionLabel ? (
             <Link
               href={actionHref}
-              className="text-sm font-bold text-[#3F5B93] underline underline-offset-4"
+              className="text-sm font-bold text-white/70 underline underline-offset-4 transition hover:text-white"
             >
               {actionLabel}
             </Link>
@@ -113,23 +115,23 @@ export function CelulaContextCard({
           />
 
           <div className="min-w-0 flex-1">
-            <p className="text-xs font-bold uppercase tracking-widest text-[#3F5B93]">
+            <p className="text-xs font-bold uppercase tracking-widest text-white/60">
               {contextEyebrow}
             </p>
-            <h2 className="font-heading mt-1 text-[1.9rem] font-extrabold leading-tight tracking-[-0.04em] text-[#1A1C1F]">
+            <h2 className="font-heading mt-1 text-[1.9rem] font-extrabold leading-tight tracking-[-0.04em] text-white">
               {contextTitle}
             </h2>
 
             <div className="mt-4 flex flex-wrap gap-2.5">
-              <span className="inline-flex items-center gap-2 rounded-full bg-[#F3F3F7] px-3 py-1.5 text-sm text-[#444750]">
-                <LeaderChipIcon className="h-3 w-3 shrink-0" alt="" />
+              <span className="inline-flex items-center gap-2 rounded-full bg-white/10 px-3 py-1.5 text-sm text-white/80">
+                <LeaderChipIcon className="h-3 w-3 shrink-0 brightness-0 invert" alt="" />
                 {contextPrimaryChip}
               </span>
-              <span className="inline-flex items-center gap-2 rounded-full bg-[#F3F3F7] px-3 py-1.5 text-sm text-[#444750]">
-                <ScheduleChipIcon className="h-3.5 w-3 shrink-0" alt="" />
+              <span className="inline-flex items-center gap-2 rounded-full bg-white/10 px-3 py-1.5 text-sm text-white/80">
+                <ScheduleChipIcon className="h-3.5 w-3 shrink-0 brightness-0 invert" alt="" />
                 {contextSecondaryChip}
               </span>
-              <span className="inline-flex items-center rounded-full bg-[#EEF3FF] px-3 py-1.5 text-sm font-semibold text-[#17305E]">
+              <span className="inline-flex items-center rounded-full bg-white/15 px-3 py-1.5 text-sm font-semibold text-white">
                 Codigo: {accessCode}
               </span>
             </div>
