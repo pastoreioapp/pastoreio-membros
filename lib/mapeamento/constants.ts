@@ -20,3 +20,8 @@ export const MEMBER_FORM_FIELDS = {
 } as const;
 
 export const ACCESS_CODE_SEARCH_PARAM = "codigo";
+export const ACCESS_TYPE_SEARCH_PARAM = "tipo";
+
+export type AccessType = "celula" | "setor";
+export const ACCESS_TYPE_CELULA: AccessType = "celula";
+export const ACCESS_TYPE_SETOR: AccessType = "setor";
