@@ -38,7 +38,7 @@ export default async function SetorCelulasPage({
 
   return (
     <>
-      <InsightsPanel members={members} totalCelulas={celulas.length} />
+      <InsightsPanel members={members} totalCelulas={celulas.length} celulas={celulas} />
       <CelulaList
         celulas={celulas}
         setorNome={access.setor.nome}
