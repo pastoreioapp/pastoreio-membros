@@ -3,6 +3,7 @@ CREATE TABLE mapeamento.setores (
   nome TEXT NOT NULL,
   descricao TEXT NULL,
   lideres TEXT NULL,
+  codigo_acesso TEXT UNIQUE,
   created_at TIMESTAMP WITH TIME ZONE NULL DEFAULT now(),
 
   CONSTRAINT setores_pkey PRIMARY KEY (id),

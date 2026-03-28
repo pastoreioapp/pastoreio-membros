@@ -17,6 +17,7 @@ export type SetorOption = {
   nome: string;
   descricao: string | null;
   lideres: string | null;
+  codigoAcesso: string | null;
 };
 
 export type LoadCelulasResult = {

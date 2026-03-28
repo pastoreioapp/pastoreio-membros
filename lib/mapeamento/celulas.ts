@@ -7,21 +7,23 @@ import type { CelulaOption, LoadCelulasResult } from "@/lib/mapeamento/types";
 import { getSupabaseConfigError, getSupabaseServerClient } from "@/lib/supabase/server";
 
 const CELULAS_SELECT_COLUMNS =
-  "id, nome, setor, setor_id, lideres, dia_semana, horario, foto_url, codigo_acesso";
+  "id, nome, setor_id, lideres, dia_semana, horario, foto_url, codigo_acesso, setores(nome)";
 const DEFAULT_CELULA_PHOTOS_BUCKET = "celulas";
 const LOAD_CELULAS_ERROR_MESSAGE =
   "Nao foi possivel carregar as celulas agora. Verifique a conexao com o Supabase.";
 
+type SetorJoin = { nome: string };
+
 type CelulaRow = {
   id: string;
   nome: string;
-  setor: string | null;
   setor_id: string | null;
   lideres: string | null;
   dia_semana: string | null;
   horario: string | null;
   foto_url: string | null;
   codigo_acesso: string | null;
+  setores: SetorJoin | SetorJoin[] | null;
 };
 
 function isAbsoluteUrl(value: string) {
@@ -67,7 +69,9 @@ function mapCelulaRowToOption(
   return {
     id: celula.id,
     nome: celula.nome,
-    setor: celula.setor,
+    setor: Array.isArray(celula.setores)
+      ? celula.setores[0]?.nome ?? null
+      : celula.setores?.nome ?? null,
     setorId: celula.setor_id,
     lideres: celula.lideres,
     diaSemana: celula.dia_semana,

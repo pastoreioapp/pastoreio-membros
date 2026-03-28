@@ -2,17 +2,19 @@ import "server-only";
 
 import { cache } from "react";
 
+import { normalizeAccessCode } from "@/lib/mapeamento/celulas";
 import { MAPEAMENTO_SCHEMA, MAPEAMENTO_TABLES } from "@/lib/mapeamento/constants";
 import type { SetorOption } from "@/lib/mapeamento/types";
 import { getSupabaseConfigError, getSupabaseServerClient } from "@/lib/supabase/server";
 
-const SETORES_SELECT_COLUMNS = "id, nome, descricao, lideres";
+const SETORES_SELECT_COLUMNS = "id, nome, descricao, lideres, codigo_acesso";
 
 type SetorRow = {
   id: string;
   nome: string;
   descricao: string | null;
   lideres: string | null;
+  codigo_acesso: string | null;
 };
 
 function mapSetorRowToOption(row: SetorRow): SetorOption {
@@ -21,17 +23,21 @@ function mapSetorRowToOption(row: SetorRow): SetorOption {
     nome: row.nome,
     descricao: row.descricao,
     lideres: row.lideres,
+    codigoAcesso: row.codigo_acesso,
   };
 }
 
 export type ResolvedSetorAccess = {
+  code: string;
   setorId: string;
   setor: SetorOption;
 };
 
-export const resolveSetorById = cache(
-  async (setorId: string): Promise<ResolvedSetorAccess | null> => {
-    if (!setorId) {
+export const loadSetorByAccessCode = cache(
+  async (rawCode: string | null | undefined): Promise<ResolvedSetorAccess | null> => {
+    const normalized = normalizeAccessCode(rawCode);
+
+    if (!normalized) {
       return null;
     }
 
@@ -47,7 +53,7 @@ export const resolveSetorById = cache(
         .schema(MAPEAMENTO_SCHEMA)
         .from(MAPEAMENTO_TABLES.setores)
         .select(SETORES_SELECT_COLUMNS)
-        .eq("id", setorId)
+        .eq("codigo_acesso", normalized)
         .maybeSingle();
 
       if (error || !data) {
@@ -57,6 +63,7 @@ export const resolveSetorById = cache(
       const setor = mapSetorRowToOption(data as SetorRow);
 
       return {
+        code: normalized,
         setorId: setor.id,
         setor,
       };

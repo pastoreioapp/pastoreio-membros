@@ -14,6 +14,6 @@ export function buildMemberSelfRegistrationRoute(accessCode: string) {
   return `/membro/${encodeURIComponent(accessCode)}`;
 }
 
-export function buildSetorCelulasRoute(setorId: string) {
-  return `/setor/${encodeURIComponent(setorId)}`;
+export function buildSetorCelulasRoute(accessCode: string) {
+  return `/setor/${encodeURIComponent(accessCode)}`;
 }

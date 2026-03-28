@@ -3,11 +3,11 @@ import Image from "next/image";
 import { notFound } from "next/navigation";
 
 import { SetorContextCard } from "@/components/membros/setor-context";
-import { resolveSetorById } from "@/lib/mapeamento/setores";
+import { resolveSetorRouteAccess } from "@/lib/mapeamento/rotas";
 
 type SetorAreaLayoutProps = {
   children: React.ReactNode;
-  params: Promise<{ id: string }>;
+  params: Promise<{ codigo: string }>;
 };
 
 export default async function SetorAreaLayout({
@@ -16,8 +16,8 @@ export default async function SetorAreaLayout({
 }: SetorAreaLayoutProps) {
   await connection();
 
-  const { id } = await params;
-  const access = await resolveSetorById(id);
+  const { codigo } = await params;
+  const access = await resolveSetorRouteAccess(codigo);
 
   if (!access) {
     notFound();
@@ -40,7 +40,10 @@ export default async function SetorAreaLayout({
 
       <div className="mx-auto w-full max-w-[816px] px-4 py-8 sm:px-6 sm:py-10">
         <div className="space-y-6">
-          <SetorContextCard setor={access.setor} />
+          <SetorContextCard
+            setor={access.setor}
+            accessCode={access.access.code}
+          />
           {children}
         </div>
       </div>

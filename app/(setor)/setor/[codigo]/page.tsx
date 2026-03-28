@@ -2,23 +2,23 @@ import { notFound } from "next/navigation";
 
 import { CelulaList } from "@/components/membros/celula-list";
 import { loadCelulasBySetorId } from "@/lib/mapeamento/celulas";
-import { resolveSetorById } from "@/lib/mapeamento/setores";
+import { resolveSetorRouteAccess } from "@/lib/mapeamento/rotas";
 
 type SetorCelulasPageProps = {
-  params: Promise<{ id: string }>;
+  params: Promise<{ codigo: string }>;
 };
 
 export default async function SetorCelulasPage({
   params,
 }: SetorCelulasPageProps) {
-  const { id } = await params;
-  const access = await resolveSetorById(id);
+  const { codigo } = await params;
+  const access = await resolveSetorRouteAccess(codigo);
 
   if (!access) {
     notFound();
   }
 
-  const { celulas, loadError } = await loadCelulasBySetorId(access.setorId);
+  const { celulas, loadError } = await loadCelulasBySetorId(access.access.setorId);
 
   if (loadError) {
     return (

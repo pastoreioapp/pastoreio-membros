@@ -7,9 +7,10 @@ import type { SetorOption } from "@/lib/mapeamento/types";
 
 type SetorContextCardProps = {
   setor: SetorOption;
+  accessCode: string;
 };
 
-export function SetorContextCard({ setor }: SetorContextCardProps) {
+export function SetorContextCard({ setor, accessCode }: SetorContextCardProps) {
   return (
     <section className="relative overflow-hidden rounded-[24px] bg-linear-to-br from-[#2D4E8A] via-[#3F5B93] to-[#6B8AC4] shadow-[0_18px_50px_rgba(23,48,94,0.18)]">
       <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,rgba(255,255,255,0.10),transparent_60%)]" />
@@ -53,6 +54,9 @@ export function SetorContextCard({ setor }: SetorContextCardProps) {
                   {setor.descricao}
                 </span>
               ) : null}
+              <span className="inline-flex items-center rounded-full bg-white/15 px-3 py-1.5 text-sm font-semibold text-white">
+                Codigo: {accessCode}
+              </span>
             </div>
           </div>
         </div>
