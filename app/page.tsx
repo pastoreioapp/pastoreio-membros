@@ -4,8 +4,18 @@ import { redirect } from "next/navigation";
 
 import { AccessCodeGate } from "@/components/membros/access-code-gate";
 import { loadCelulaByAccessCode } from "@/lib/mapeamento/celulas";
-import { ACCESS_CODE_SEARCH_PARAM } from "@/lib/mapeamento/constants";
-import { buildLeaderMembersRoute } from "@/lib/mapeamento/routes";
+import { loadSetorByAccessCode } from "@/lib/mapeamento/setores";
+import {
+  ACCESS_CODE_SEARCH_PARAM,
+  ACCESS_TYPE_SEARCH_PARAM,
+  ACCESS_TYPE_CELULA,
+  ACCESS_TYPE_SETOR,
+  type AccessType,
+} from "@/lib/mapeamento/constants";
+import {
+  buildLeaderMembersRoute,
+  buildSetorCelulasRoute,
+} from "@/lib/mapeamento/routes";
 
 type HomePageProps = {
   searchParams: Promise<Record<string, string | string[] | undefined>>;
@@ -17,20 +27,41 @@ function readSearchParamValue(
   return Array.isArray(value) ? value[0] : value;
 }
 
+function parseAccessType(value: string | undefined): AccessType {
+  return value === ACCESS_TYPE_SETOR ? ACCESS_TYPE_SETOR : ACCESS_TYPE_CELULA;
+}
+
 export default async function Home({ searchParams }: HomePageProps) {
   await connection();
 
   const params = await searchParams;
   const rawCode = readSearchParamValue(params[ACCESS_CODE_SEARCH_PARAM]);
-  const resolvedAccess = await loadCelulaByAccessCode(rawCode);
-
-  if (resolvedAccess) {
-    redirect(buildLeaderMembersRoute(resolvedAccess.code));
-  }
+  const accessType = parseAccessType(
+    readSearchParamValue(params[ACCESS_TYPE_SEARCH_PARAM])
+  );
 
   const hasProvidedCode = Boolean(rawCode?.trim());
-  const accessError = hasProvidedCode && !resolvedAccess
-    ? "Codigo invalido. Confira o codigo da sua celula e tente novamente."
+
+  if (hasProvidedCode) {
+    if (accessType === ACCESS_TYPE_SETOR) {
+      const resolved = await loadSetorByAccessCode(rawCode);
+
+      if (resolved) {
+        redirect(buildSetorCelulasRoute(resolved.code));
+      }
+    } else {
+      const resolved = await loadCelulaByAccessCode(rawCode);
+
+      if (resolved) {
+        redirect(buildLeaderMembersRoute(resolved.code));
+      }
+    }
+  }
+
+  const accessError = hasProvidedCode
+    ? accessType === ACCESS_TYPE_SETOR
+      ? "Codigo invalido. Confira o codigo do seu setor e tente novamente."
+      : "Codigo invalido. Confira o codigo da sua celula e tente novamente."
     : null;
 
   return (
@@ -51,6 +82,7 @@ export default async function Home({ searchParams }: HomePageProps) {
       <div className="mx-auto w-full max-w-[816px] px-4 py-8 sm:px-6 sm:py-10">
         <AccessCodeGate
           defaultValue={rawCode ?? ""}
+          defaultType={accessType}
           errorMessage={accessError}
         />
       </div>

@@ -464,6 +464,56 @@ export async function loadMemberByIdAndCelulaId(
   }
 }
 
+export async function loadMembersBySetorId(
+  setorId: string
+): Promise<{ members: MemberListItem[]; loadError: string | null }> {
+  const configError = getSupabaseConfigError();
+
+  if (configError) {
+    return { members: [], loadError: configError };
+  }
+
+  try {
+    const supabase = getSupabaseServerClient();
+
+    const { data: celulas, error: celulasError } = await supabase
+      .schema(MAPEAMENTO_SCHEMA)
+      .from(MAPEAMENTO_TABLES.celulas)
+      .select("id")
+      .eq("setor_id", setorId);
+
+    if (celulasError) {
+      throw celulasError;
+    }
+
+    const celulaIds = (celulas ?? []).map((c: { id: string }) => c.id);
+
+    if (celulaIds.length === 0) {
+      return { members: [], loadError: null };
+    }
+
+    const { data, error } = await supabase
+      .schema(MAPEAMENTO_SCHEMA)
+      .from(MAPEAMENTO_TABLES.membros)
+      .select(
+        "id, nome, celula_id, estado_civil, telefone, data_nascimento, discipulador_nome, ministerios, passos_concluidos, created_at"
+      )
+      .in("celula_id", celulaIds)
+      .order("nome", { ascending: true });
+
+    if (error) {
+      throw error;
+    }
+
+    return {
+      members: ((data ?? []) as MemberRow[]).map(mapMemberRowToListItem),
+      loadError: null,
+    };
+  } catch {
+    return { members: [], loadError: SAVE_MEMBER_ERROR_MESSAGE };
+  }
+}
+
 export function mapMemberToFormValues(member: MemberListItem): MemberFormValues {
   return {
     id: member.id,

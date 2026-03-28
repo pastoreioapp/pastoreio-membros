@@ -76,3 +76,77 @@ export const TotalPassosTrajetoria = TodosPassosTrajetoria.length;
 export const CategoriasTrajetoriaEntries = Object.entries(
   CategoriasTrajetoria
 ) as [CategoriaTrajetoria, readonly PassoTrajetoria[]][];
+
+export function computeTrajectoryInsights(
+  members: { passosConcluidos: PassoTrajetoria[]; discipuladorNome: string | null }[]
+) {
+  const totalMembers = members.length;
+
+  if (totalMembers === 0) {
+    return {
+      totalMembers: 0,
+      totalCompletedSteps: 0,
+      totalPossibleSteps: 0,
+      overallPercentage: 0,
+      membersWithFullTrajectory: 0,
+      membersWithDiscipulador: 0,
+      categories: CategoriasTrajetoriaEntries.map(([name]) => ({
+        name,
+        description: CategoriaTrajetoriaDescriptions[name],
+        completedCount: 0,
+        totalPossible: 0,
+        percentage: 0,
+      })),
+    };
+  }
+
+  const totalPossibleSteps = totalMembers * TotalPassosTrajetoria;
+  let totalCompletedSteps = 0;
+  let membersWithFullTrajectory = 0;
+  let membersWithDiscipulador = 0;
+
+  for (const member of members) {
+    totalCompletedSteps += member.passosConcluidos.length;
+    if (member.passosConcluidos.length === TotalPassosTrajetoria) {
+      membersWithFullTrajectory++;
+    }
+    if (member.discipuladorNome) {
+      membersWithDiscipulador++;
+    }
+  }
+
+  const overallPercentage = Math.round(
+    (totalCompletedSteps / totalPossibleSteps) * 100
+  );
+
+  const categories = CategoriasTrajetoriaEntries.map(([name, steps]) => {
+    const totalPossible = totalMembers * steps.length;
+    let completedCount = 0;
+
+    for (const member of members) {
+      for (const passo of member.passosConcluidos) {
+        if ((steps as readonly string[]).includes(passo)) {
+          completedCount++;
+        }
+      }
+    }
+
+    return {
+      name,
+      description: CategoriaTrajetoriaDescriptions[name],
+      completedCount,
+      totalPossible,
+      percentage: totalPossible > 0 ? Math.round((completedCount / totalPossible) * 100) : 0,
+    };
+  });
+
+  return {
+    totalMembers,
+    totalCompletedSteps,
+    totalPossibleSteps,
+    overallPercentage,
+    membersWithFullTrajectory,
+    membersWithDiscipulador,
+    categories,
+  };
+}

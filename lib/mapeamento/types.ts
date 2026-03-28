@@ -4,10 +4,19 @@ export type CelulaOption = {
   id: string;
   nome: string;
   setor: string | null;
+  setorId: string | null;
   lideres: string | null;
   diaSemana: string | null;
   horario: string | null;
   fotoUrl: string | null;
+  codigoAcesso: string | null;
+};
+
+export type SetorOption = {
+  id: string;
+  nome: string;
+  descricao: string | null;
+  lideres: string | null;
   codigoAcesso: string | null;
 };
 
@@ -67,6 +76,54 @@ export type CreateMemberInput = {
 
 export type UpdateMemberInput = CreateMemberInput & {
   id: string;
+};
+
+export type SaveCelulaFieldErrors = {
+  nome?: string;
+  lideres?: string;
+  diaSemana?: string;
+  horario?: string;
+  codigoAcesso?: string;
+  setorCodigoAcesso?: string;
+};
+
+export type SaveCelulaState = {
+  status: "idle" | "success" | "error";
+  message: string | null;
+  fieldErrors: SaveCelulaFieldErrors;
+};
+
+export const initialSaveCelulaState: SaveCelulaState = {
+  status: "idle",
+  message: null,
+  fieldErrors: {},
+};
+
+export type CreateCelulaInput = {
+  nome: string;
+  setorId: string;
+  lideres: string | null;
+  diaSemana: string | null;
+  horario: string | null;
+  codigoAcesso: string | null;
+};
+
+export type CategoryInsight = {
+  name: string;
+  description: string;
+  completedCount: number;
+  totalPossible: number;
+  percentage: number;
+};
+
+export type TrajectoryInsights = {
+  totalMembers: number;
+  totalCompletedSteps: number;
+  totalPossibleSteps: number;
+  overallPercentage: number;
+  membersWithFullTrajectory: number;
+  membersWithDiscipulador: number;
+  categories: CategoryInsight[];
 };
 
 export type MemberFormValues = {

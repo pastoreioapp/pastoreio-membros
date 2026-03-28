@@ -9,17 +9,27 @@ alwaysApply: false
 ## Pages and Layouts
 - Pages are async Server Components. They `await params`/`searchParams`, call loaders from `lib/mapeamento/*`, and render UI components.
 - Routes under `(lider)/lider/[codigo]` must resolve access via `resolveLeaderRouteAccess(codigo)` from `lib/mapeamento/rotas.ts` and call `notFound()` when it returns `null`.
-- The layout already validates access and renders the header/cell card. Pages should not re-render that context — just load their own data.
+- Routes under `(setor)/setor/[codigo]` must resolve access via `resolveSetorRouteAccess(codigo)` from `lib/mapeamento/rotas.ts` and call `notFound()` when it returns `null`.
+- The layout already validates access and renders the header/context card. Pages should not re-render that context — just load their own data.
+- Both layouts include a `BackButton` in the header for history-based navigation.
 
-## Server Actions (`app/actions/membros.ts`)
-- Signature: `(prevState: SaveMemberState, formData: FormData) => Promise<SaveMemberState>`.
-- Actions orchestrate only: read form data → call `validate*` → call `createMember`/`updateMember` → `revalidatePath` → `redirect` or return error state.
-- Business rules and validation belong in `lib/mapeamento/membros.ts`, not in action bodies.
-- Use `MEMBER_FORM_FIELDS` to read form fields — never use raw string keys.
+## Home Page (`app/page.tsx`)
+- Unified access code gate supporting both celula and setor access types.
+- Uses `ACCESS_TYPE_SEARCH_PARAM` (`tipo`) and `ACCESS_CODE_SEARCH_PARAM` (`codigo`) search params.
+- Resolves code via `loadCelulaByAccessCode` or `loadSetorByAccessCode` based on type.
+- Redirects to `/lider/[codigo]` or `/setor/[codigo]` on success.
+
+## Server Actions
+- **Member actions** (`app/actions/membros.ts`): `saveLeaderMemberAction`, `saveSelfRegisterMemberAction`, `updateLeaderMemberAction`.
+- **Cell actions** (`app/actions/celulas.ts`): `saveSetorCelulaAction`.
+- Signature: `(prevState: State, formData: FormData) => Promise<State>`.
+- Actions orchestrate only: read form data → call `validate*` → call `create*`/`update*` → `revalidatePath` → `redirect` or return error state.
+- Business rules and validation belong in `lib/mapeamento/*.ts`, not in action bodies.
+- Use `*_FORM_FIELDS` to read form fields — never use raw string keys.
 - `revalidatePath` targets the specific routes affected (use `build*Route` helpers), not `/`.
 
 ## Adding a New Route
-1. Create the file under the appropriate route group.
-2. Use `resolveLeaderRouteAccess` for `[codigo]` routes (guard with `notFound()`).
+1. Create the file under the appropriate route group (`(lider)` or `(setor)`).
+2. Use `resolveLeaderRouteAccess` or `resolveSetorRouteAccess` for `[codigo]` routes (guard with `notFound()`).
 3. Build any links or redirects with `lib/mapeamento/routes.ts` helpers.
-4. If the route needs a new action, follow the existing pattern in `app/actions/membros.ts`.
+4. If the route needs a new action, follow the existing pattern in `app/actions/`.

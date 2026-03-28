@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useMemo, useState } from "react";
 
 import { TotalPassosTrajetoria } from "@/lib/mapeamento/trajetoria";
+import { InsightsPanel } from "@/components/membros/insights-panel";
 import { MemberTrajectorySheet } from "@/components/membros/member-trajectory-sheet";
 import { MemberSelfRegisterShare } from "@/components/membros/member-self-register-share";
 import { formatCreatedAt, formatPhone } from "@/lib/mapeamento/formatting";
@@ -33,6 +34,8 @@ export function MemberList({ accessCode, celula, members }: MemberListProps) {
         <MemberSelfRegisterShare
           href={buildMemberSelfRegistrationRoute(accessCode)}
         />
+
+        <InsightsPanel members={members} />
 
         <div className="mt-15 flex flex-col gap-4 pb-1 sm:flex-row sm:items-end sm:justify-between">
           <div>
