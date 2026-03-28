@@ -9,16 +9,23 @@ alwaysApply: false
 ## Schema
 All tables live under the `mapeamento` schema. Use explicit `mapeamento.` prefix in migration SQL.
 
+## Tables
+- `mapeamento.setores` — sectors with `codigo_acesso` for access-code-based routing.
+- `mapeamento.celulas` — cells with `setor_id` FK to `setores` and `codigo_acesso` for leader routing.
+- `mapeamento.membros` — members with `celula_id` FK to `celulas`.
+
 ## Cross-Layer Alignment
 Every migration must be accompanied by matching changes in the TypeScript domain layer:
 1. Column added/renamed → update the `*Row` type and `*_SELECT_COLUMNS` in the relevant `lib/mapeamento/*.ts` file.
-2. Column affects forms → update `MEMBER_FORM_FIELDS` in `constants.ts`, input types in `types.ts`, and validation in `membros.ts`.
-3. Column affects UI → update the mapper function and any component that displays the field.
+2. Column affects member forms → update `MEMBER_FORM_FIELDS` in `constants.ts`, input types in `types.ts`, and validation in `membros.ts`.
+3. Column affects cell forms → update `CELULA_FORM_FIELDS` in `constants.ts`, input types in `types.ts`, and validation in `celulas.ts`.
+4. Column affects UI → update the mapper function and any component that displays the field.
 
 ## Critical Columns
 - `passos_concluidos` (`TEXT[]` on `membros`) — values must exactly match `PassoTrajetoria` enum strings in `lib/mapeamento/trajetoria.ts`. A migration that changes step names requires a data backfill.
-- `codigo_acesso` (`TEXT UNIQUE` on `celulas`) — the normalized access code used for leader routing. Changes must consider existing links and client redirects.
+- `codigo_acesso` (`TEXT UNIQUE` on `celulas` and `setores`) — the normalized access code used for routing. Changes must consider existing links and client redirects.
+- `setor_id` (`UUID` FK on `celulas`) — links cells to sectors. The old `celulas.setor` text column is deprecated.
 
 ## Naming
-- Migration files are named sequentially with a descriptive suffix (e.g., `fourth_celula_codigo_acesso.sql`).
+- Migration files are named sequentially with a descriptive suffix (e.g., `fifth_setores.sql`).
 - Use `ALTER TABLE` for additive changes; avoid `DROP` without explicit user confirmation.

@@ -1,31 +1,57 @@
 ---
-description: Member UI component conventions (form contract, mobile UX, trajectory)
+description: UI component conventions (forms, lists, insights, mobile UX)
 globs: components/membros/**/*.tsx
 alwaysApply: false
 ---
 
-# Member UI Components
+# UI Components (`components/membros/`)
 
 ## Client-Only Imports
 These components are `"use client"`. They may import from:
-- `lib/mapeamento/trajetoria.ts` — trajectory steps, categories, totals
-- `lib/mapeamento/constants.ts` — `MEMBER_FORM_FIELDS`
-- `lib/mapeamento/types.ts` — `CelulaOption`, `MemberFormValues`, `SaveMemberState`, etc.
+- `lib/mapeamento/trajetoria.ts` — trajectory steps, categories, totals, `computeTrajectoryInsights`
+- `lib/mapeamento/constants.ts` — `MEMBER_FORM_FIELDS`, `CELULA_FORM_FIELDS`
+- `lib/mapeamento/types.ts` — `CelulaOption`, `SetorOption`, `MemberListItem`, `MemberFormValues`, `SaveMemberState`, `SaveCelulaState`, `TrajectoryInsights`, etc.
 - `lib/mapeamento/routes.ts` — URL builders
 - `lib/mapeamento/formatting.ts` — `formatPhone`, `formatBirthDate`, `formatCreatedAt`
 
-Never import from `celulas.ts`, `membros.ts`, `rotas.ts`, or `lib/supabase/*`.
+Never import from `celulas.ts`, `membros.ts`, `setores.ts`, `rotas.ts`, or `lib/supabase/*`.
 
-## Form Contract
+## Member Form Contract
 - `MemberForm` uses `useActionState` with a server action passed as prop.
 - All form `name` attributes use `MEMBER_FORM_FIELDS` constants.
 - Trajectory selections are React-controlled state. Selected values are submitted via hidden `<input>` elements with `name={MEMBER_FORM_FIELDS.passosConcluidos}` — one per selected step. Server reads them with `formData.getAll(...)`.
 - `codigo_acesso` and `celula_id` are also submitted as hidden inputs.
 - Do not convert this to uncontrolled checkboxes without also updating `getSelectedPassos` in `lib/mapeamento/membros.ts`.
 
+## Cell Form Contract
+- `CelulaForm` uses `useActionState` with `saveSetorCelulaAction`.
+- All form `name` attributes use `CELULA_FORM_FIELDS` constants.
+- `setor_codigo_acesso` is submitted as a hidden input.
+
+## Insights Panel
+- `InsightsPanel` is a reusable client component that accepts `members` and optional `celulas`/`totalCelulas` props.
+- It uses `computeTrajectoryInsights` from `trajetoria.ts` — never inline trajectory math.
+- When `celulas` prop is provided (setor context), it renders a per-cell trajectory ranking section.
+- When `celulas` is not provided (celula context), only general insights are shown.
+
 ## Component Structure
 - `MemberForm` composes: `CelulaSelector`, `MemberPersonalFields`, `MemberTrajectoryFields`, `SubmitButton`.
-- Keep each subcomponent focused on its section. Shared state (form values, errors) is passed as props from `MemberForm`.
+- `MemberList` composes: `MemberSelfRegisterShare`, `InsightsPanel`, `MemberTrajectorySheet`.
+- `CelulaList` renders cell cards with links to `/lider/[codigo]` and a "Cadastrar celula" button.
+- `InsightsPanel` renders: `StatCard` grid, category `ProgressBar` list, and optional `CelulaRankingList`.
+- Keep each subcomponent focused on its section. Shared state (form values, errors) is passed as props.
+
+## Key Components
+| Component | Purpose |
+|-----------|---------|
+| `member-list.tsx` | Member listing with trajectory progress bars and insights |
+| `celula-list.tsx` | Cell listing for sector view with "Cadastrar celula" button |
+| `celula-form.tsx` | Cell creation form (nome, lideres, dia_semana, horario, codigo_acesso) |
+| `insights-panel.tsx` | Trajectory insights with stat cards, category progress, and per-cell ranking |
+| `setor-context.tsx` | Sector context card for sector header |
+| `celula-context.tsx` | Cell context card (`CelulaContextCard`, `CelulaAvatar`) |
+| `back-button.tsx` | History-based back navigation in headers |
+| `access-code-gate.tsx` | Unified access code form with celula/setor toggle |
 
 ## Mobile-First & Accessibility
 - Touch targets: minimum 44x44px.

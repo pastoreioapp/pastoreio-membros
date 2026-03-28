@@ -7,25 +7,39 @@ alwaysApply: false
 # Mapeamento Domain Layer
 
 ## Server-Only Boundary
-Files that access Supabase (`celulas.ts`, `membros.ts`, `rotas.ts`) must keep `import "server-only"` at the top. Client-safe modules (`trajetoria.ts`, `constants.ts`, `types.ts`, `routes.ts`, `formatting.ts`) must never import server-only dependencies.
+Files that access Supabase (`celulas.ts`, `membros.ts`, `setores.ts`, `rotas.ts`) must keep `import "server-only"` at the top. Client-safe modules (`trajetoria.ts`, `constants.ts`, `types.ts`, `routes.ts`, `formatting.ts`) must never import server-only dependencies.
 
 ## Supabase Queries
 - Always use `MAPEAMENTO_SCHEMA` and `MAPEAMENTO_TABLES` from `constants.ts` — never raw table/schema strings.
 - Column selection: maintain a `*_SELECT_COLUMNS` constant and a matching `*Row` type per table. When schema changes, update both together.
-- Row-to-domain mapping: each table has a mapper function (e.g., `mapCelulaRowToOption`, `mapMemberRow`). New columns go through the mapper, not ad-hoc reads.
+- Row-to-domain mapping: each table has a mapper function (e.g., `mapCelulaRowToOption`, `mapMemberRowToListItem`, `mapSetorRowToOption`). New columns go through the mapper, not ad-hoc reads.
+- `celulas.ts` joins `setores(nome)` via the `setor_id` FK to populate `CelulaOption.setor`. The old `celulas.setor` text column is deprecated.
 
 ## Validation
-- `validateCreateMemberFormData` and `validateUpdateMemberFormData` are async (they resolve access codes via DB).
-- They delegate to `validateMemberPayload` for field-level checks.
-- Field keys come from `MEMBER_FORM_FIELDS` — keep HTML `name` attributes, validation, and types in sync.
+- **Members:** `validateCreateMemberFormData` and `validateUpdateMemberFormData` are async (they resolve access codes via DB). They delegate to `validateMemberPayload` for field-level checks. Field keys come from `MEMBER_FORM_FIELDS`.
+- **Cells:** `validateCreateCelulaFormData` is async (it resolves the sector access code). Field keys come from `CELULA_FORM_FIELDS`.
 
 ## Request-Level Caching
-- `loadCelulaByAccessCode` and `resolveLeaderRouteAccess` are wrapped with `React.cache()` to deduplicate Supabase calls within a single request.
+- `loadCelulaByAccessCode`, `resolveLeaderRouteAccess`, `loadSetorByAccessCode`, and `resolveSetorRouteAccess` are wrapped with `React.cache()` to deduplicate Supabase calls within a single request.
 - Do not add redundant caching layers on top of these functions.
+
+## Trajectory Insights
+- `computeTrajectoryInsights` in `trajetoria.ts` is the single source of truth for all trajectory analytics. It accepts an array of members and returns overall %, per-category %, and counts.
+- Never compute trajectory percentages ad-hoc — always use this function.
+- The `InsightsPanel` component consumes its output. For setor-level insights, `loadMembersBySetorId` aggregates members across all cells.
 
 ## Adding a New Domain Entity
 1. Define types in `types.ts`.
 2. Add table constant to `MAPEAMENTO_TABLES` in `constants.ts`.
 3. Create loader/persistence functions in a new or existing file under `lib/mapeamento/`.
 4. Mark the file `import "server-only"` if it touches Supabase.
-5. Expose form field names in `MEMBER_FORM_FIELDS` (or a new `*_FORM_FIELDS` constant) if UI forms are involved.
+5. Expose form field names in a `*_FORM_FIELDS` constant in `constants.ts` if UI forms are involved.
+
+## Key Functions by File
+| File | Key exports |
+|------|-------------|
+| `celulas.ts` | `loadCelulaByAccessCode`, `loadCelulasBySetorId`, `validateCreateCelulaFormData`, `createCelula` |
+| `membros.ts` | `loadMembersByCelulaId`, `loadMembersBySetorId`, `validateCreateMemberFormData`, `createMember`, `updateMember` |
+| `setores.ts` | `loadSetorByAccessCode` |
+| `rotas.ts` | `resolveLeaderRouteAccess`, `resolveSetorRouteAccess` |
+| `trajetoria.ts` | `computeTrajectoryInsights`, `TotalPassosTrajetoria`, `CategoriasTrajetoriaEntries` |
