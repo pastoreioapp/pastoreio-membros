@@ -17,3 +17,7 @@ export function buildMemberSelfRegistrationRoute(accessCode: string) {
 export function buildSetorCelulasRoute(accessCode: string) {
   return `/setor/${encodeURIComponent(accessCode)}`;
 }
+
+export function buildSetorNewCelulaRoute(accessCode: string) {
+  return `${buildSetorCelulasRoute(accessCode)}/nova-celula`;
+}

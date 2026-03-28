@@ -78,6 +78,36 @@ export type UpdateMemberInput = CreateMemberInput & {
   id: string;
 };
 
+export type SaveCelulaFieldErrors = {
+  nome?: string;
+  lideres?: string;
+  diaSemana?: string;
+  horario?: string;
+  codigoAcesso?: string;
+  setorCodigoAcesso?: string;
+};
+
+export type SaveCelulaState = {
+  status: "idle" | "success" | "error";
+  message: string | null;
+  fieldErrors: SaveCelulaFieldErrors;
+};
+
+export const initialSaveCelulaState: SaveCelulaState = {
+  status: "idle",
+  message: null,
+  fieldErrors: {},
+};
+
+export type CreateCelulaInput = {
+  nome: string;
+  setorId: string;
+  lideres: string | null;
+  diaSemana: string | null;
+  horario: string | null;
+  codigoAcesso: string | null;
+};
+
 export type MemberFormValues = {
   id?: string;
   nome: string;

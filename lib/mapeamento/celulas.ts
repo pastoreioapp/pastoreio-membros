@@ -2,8 +2,15 @@ import "server-only";
 
 import { cache } from "react";
 
-import { MAPEAMENTO_SCHEMA, MAPEAMENTO_TABLES } from "@/lib/mapeamento/constants";
-import type { CelulaOption, LoadCelulasResult } from "@/lib/mapeamento/types";
+import { MAPEAMENTO_SCHEMA, MAPEAMENTO_TABLES, CELULA_FORM_FIELDS } from "@/lib/mapeamento/constants";
+import type {
+  CelulaOption,
+  CreateCelulaInput,
+  LoadCelulasResult,
+  SaveCelulaFieldErrors,
+  SaveCelulaState,
+} from "@/lib/mapeamento/types";
+import { initialSaveCelulaState } from "@/lib/mapeamento/types";
 import { getSupabaseConfigError, getSupabaseServerClient } from "@/lib/supabase/server";
 
 const CELULAS_SELECT_COLUMNS =
@@ -315,3 +322,148 @@ export const loadCelulaByAccessCode = cache(
     }
   }
 );
+
+const SAVE_CELULA_ERROR_MESSAGE =
+  "Nao foi possivel salvar a celula agora. Verifique a conexao com o Supabase e tente novamente.";
+
+function readTrimmedString(value: FormDataEntryValue | null) {
+  return typeof value === "string" ? value.trim() : "";
+}
+
+function readOptionalTrimmedString(value: FormDataEntryValue | null) {
+  const trimmed = readTrimmedString(value);
+  return trimmed ? trimmed : null;
+}
+
+function createSaveCelulaState(
+  status: SaveCelulaState["status"],
+  message: string | null,
+  fieldErrors: SaveCelulaFieldErrors = {}
+): SaveCelulaState {
+  return { ...initialSaveCelulaState, status, message, fieldErrors };
+}
+
+export function buildSaveCelulaErrorState(message: string): SaveCelulaState {
+  return createSaveCelulaState("error", message);
+}
+
+type ValidateCreateCelulaResult =
+  | { success: true; data: CreateCelulaInput }
+  | { success: false; state: SaveCelulaState };
+
+export async function validateCreateCelulaFormData(
+  formData: FormData
+): Promise<ValidateCreateCelulaResult> {
+  const { loadSetorByAccessCode } = await import("@/lib/mapeamento/setores");
+
+  const nome = readTrimmedString(formData.get(CELULA_FORM_FIELDS.nome));
+  const lideres = readOptionalTrimmedString(formData.get(CELULA_FORM_FIELDS.lideres));
+  const diaSemana = readOptionalTrimmedString(formData.get(CELULA_FORM_FIELDS.diaSemana));
+  const horario = readOptionalTrimmedString(formData.get(CELULA_FORM_FIELDS.horario));
+  const codigoAcesso = readOptionalTrimmedString(formData.get(CELULA_FORM_FIELDS.codigoAcesso));
+  const setorCodigoAcesso = readTrimmedString(
+    formData.get(CELULA_FORM_FIELDS.setorCodigoAcesso)
+  );
+
+  const fieldErrors: SaveCelulaFieldErrors = {};
+  const resolvedSetor = await loadSetorByAccessCode(setorCodigoAcesso);
+
+  if (!setorCodigoAcesso) {
+    fieldErrors.setorCodigoAcesso = "Codigo de acesso do setor e obrigatorio.";
+  } else if (!resolvedSetor) {
+    fieldErrors.setorCodigoAcesso = "Codigo de acesso do setor invalido.";
+  }
+
+  if (!nome) {
+    fieldErrors.nome = "Informe o nome da celula.";
+  } else if (nome.length > 120) {
+    fieldErrors.nome = "Use um nome com no maximo 120 caracteres.";
+  }
+
+  if (lideres && lideres.length > 200) {
+    fieldErrors.lideres = "Use nomes de lideres com no maximo 200 caracteres.";
+  }
+
+  if (diaSemana && diaSemana.length > 60) {
+    fieldErrors.diaSemana = "Use um dia da semana com no maximo 60 caracteres.";
+  }
+
+  if (horario && horario.length > 60) {
+    fieldErrors.horario = "Use um horario com no maximo 60 caracteres.";
+  }
+
+  if (codigoAcesso) {
+    const normalizedCelulaCode = normalizeAccessCode(codigoAcesso);
+    if (normalizedCelulaCode.length < 3) {
+      fieldErrors.codigoAcesso = "O codigo de acesso deve ter pelo menos 3 caracteres.";
+    } else if (normalizedCelulaCode.length > 20) {
+      fieldErrors.codigoAcesso = "O codigo de acesso deve ter no maximo 20 caracteres.";
+    }
+  }
+
+  if (Object.keys(fieldErrors).length > 0) {
+    return {
+      success: false,
+      state: createSaveCelulaState(
+        "error",
+        "Revise os campos destacados e tente novamente.",
+        fieldErrors
+      ),
+    };
+  }
+
+  return {
+    success: true,
+    data: {
+      nome,
+      setorId: resolvedSetor!.setorId,
+      lideres,
+      diaSemana,
+      horario,
+      codigoAcesso: codigoAcesso ? normalizeAccessCode(codigoAcesso) : null,
+    },
+  };
+}
+
+type PersistCelulaResult =
+  | { success: true }
+  | { success: false; message: string };
+
+export async function createCelula(
+  input: CreateCelulaInput
+): Promise<PersistCelulaResult> {
+  const configError = getSupabaseConfigError();
+
+  if (configError) {
+    return { success: false, message: configError };
+  }
+
+  try {
+    const supabase = getSupabaseServerClient();
+    const { error } = await supabase
+      .schema(MAPEAMENTO_SCHEMA)
+      .from(MAPEAMENTO_TABLES.celulas)
+      .insert({
+        nome: input.nome,
+        setor_id: input.setorId,
+        lideres: input.lideres,
+        dia_semana: input.diaSemana,
+        horario: input.horario,
+        codigo_acesso: input.codigoAcesso,
+      });
+
+    if (error) {
+      if (error.code === "23505" && error.message?.includes("codigo_acesso")) {
+        return {
+          success: false,
+          message: "Ja existe uma celula com esse codigo de acesso. Escolha outro codigo.",
+        };
+      }
+      return { success: false, message: SAVE_CELULA_ERROR_MESSAGE };
+    }
+
+    return { success: true };
+  } catch {
+    return { success: false, message: SAVE_CELULA_ERROR_MESSAGE };
+  }
+}

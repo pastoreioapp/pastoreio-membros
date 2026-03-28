@@ -8,18 +8,22 @@ import {
   ScheduleChipIcon,
 } from "@/components/membros/member-form-icons";
 import type { CelulaOption } from "@/lib/mapeamento/types";
-import { buildLeaderMembersRoute } from "@/lib/mapeamento/routes";
+import {
+  buildLeaderMembersRoute,
+  buildSetorNewCelulaRoute,
+} from "@/lib/mapeamento/routes";
 
 type CelulaListProps = {
   celulas: CelulaOption[];
   setorNome: string;
+  setorAccessCode: string;
 };
 
 function getCelulaSchedule(celula: CelulaOption) {
   return [celula.diaSemana, celula.horario].filter(Boolean).join(", ");
 }
 
-export function CelulaList({ celulas, setorNome }: CelulaListProps) {
+export function CelulaList({ celulas, setorNome, setorAccessCode }: CelulaListProps) {
   return (
     <section className="space-y-5">
       <div className="mt-15 flex flex-col gap-4 pb-1 sm:flex-row sm:items-end sm:justify-between">
@@ -34,6 +38,13 @@ export function CelulaList({ celulas, setorNome }: CelulaListProps) {
             Células do setor {setorNome}. Clique para acessar os membros.
           </p>
         </div>
+
+        <Link
+          href={buildSetorNewCelulaRoute(setorAccessCode)}
+          className="inline-flex min-h-12 shrink-0 items-center justify-center rounded-2xl bg-[#3F5B93] px-6 text-sm font-bold uppercase tracking-widest text-white transition hover:bg-[#2D4E8A]"
+        >
+          Cadastrar celula
+        </Link>
       </div>
 
       <hr className="border-[#E2E5ED]" />

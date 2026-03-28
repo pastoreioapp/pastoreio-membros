@@ -31,5 +31,11 @@ export default async function SetorCelulasPage({
     );
   }
 
-  return <CelulaList celulas={celulas} setorNome={access.setor.nome} />;
+  return (
+    <CelulaList
+      celulas={celulas}
+      setorNome={access.setor.nome}
+      setorAccessCode={access.access.code}
+    />
+  );
 }
