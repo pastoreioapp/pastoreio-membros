@@ -8,11 +8,11 @@ import { CELULA_FORM_FIELDS } from "@/lib/constants";
 import { initialSaveCelulaState } from "@/lib/types";
 
 type CelulaFormProps = {
-  setorAccessCode: string;
-  setorNome: string;
+  unidadeAccessCode: string;
+  unidadeNome: string;
 };
 
-export function CelulaForm({ setorAccessCode, setorNome }: CelulaFormProps) {
+export function CelulaForm({ unidadeAccessCode, unidadeNome }: CelulaFormProps) {
   const [state, formAction, pending] = useActionState(
     saveSetorCelulaAction,
     initialSaveCelulaState
@@ -43,8 +43,8 @@ export function CelulaForm({ setorAccessCode, setorNome }: CelulaFormProps) {
     >
       <input
         type="hidden"
-        name={CELULA_FORM_FIELDS.setorCodigoAcesso}
-        value={setorAccessCode}
+        name={CELULA_FORM_FIELDS.unidadeCodigoAcesso}
+        value={unidadeAccessCode}
       />
 
       <section className="rounded-[28px] bg-white p-5 shadow-[0_18px_50px_rgba(26,28,31,0.08)] sm:p-6">
@@ -54,10 +54,10 @@ export function CelulaForm({ setorAccessCode, setorNome }: CelulaFormProps) {
               Nova celula
             </span>
             <h2 className="font-heading mt-3 text-3xl font-extrabold tracking-[-0.04em] text-text-primary">
-              Cadastrar celula em {setorNome}
+              Cadastrar celula em {unidadeNome}
             </h2>
             <p className="mt-2 text-sm leading-6 text-text-secondary">
-              Preencha os dados da nova celula para o setor.
+              Preencha os dados da nova celula.
             </p>
           </div>
 

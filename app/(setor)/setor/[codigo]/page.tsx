@@ -2,9 +2,9 @@ import { notFound } from "next/navigation";
 
 import { CelulaList } from "@/components/celulas/celula-list";
 import { InsightsPanel } from "@/components/insights/insights-panel";
-import { loadCelulasBySetorId } from "@/lib/celulas";
-import { loadMembersBySetorId } from "@/lib/membros";
-import { resolveSetorRouteAccess } from "@/lib/rotas";
+import { loadCelulasByUnidadeId } from "@/lib/celulas";
+import { loadMembersByUnidadeId } from "@/lib/membros";
+import { resolveUnidadeRouteAccess } from "@/lib/rotas";
 
 type SetorCelulasPageProps = {
   params: Promise<{ codigo: string }>;
@@ -14,15 +14,15 @@ export default async function SetorCelulasPage({
   params,
 }: SetorCelulasPageProps) {
   const { codigo } = await params;
-  const access = await resolveSetorRouteAccess(codigo);
+  const access = await resolveUnidadeRouteAccess(codigo);
 
   if (!access) {
     notFound();
   }
 
   const [{ celulas, loadError }, { members }] = await Promise.all([
-    loadCelulasBySetorId(access.access.setorId),
-    loadMembersBySetorId(access.access.setorId),
+    loadCelulasByUnidadeId(access.access.unidadeId),
+    loadMembersByUnidadeId(access.access.unidadeId),
   ]);
 
   if (loadError) {
@@ -41,8 +41,8 @@ export default async function SetorCelulasPage({
       <InsightsPanel members={members} totalCelulas={celulas.length} celulas={celulas} />
       <CelulaList
         celulas={celulas}
-        setorNome={access.setor.nome}
-        setorAccessCode={access.access.code}
+        unidadeNome={access.unidade.nome}
+        unidadeAccessCode={access.access.code}
       />
     </>
   );

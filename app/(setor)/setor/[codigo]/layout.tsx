@@ -4,7 +4,7 @@ import { notFound } from "next/navigation";
 
 import { BackButton } from "@/components/ui/back-button";
 import { SetorContextCard } from "@/components/setores/setor-context";
-import { resolveSetorRouteAccess } from "@/lib/rotas";
+import { resolveUnidadeRouteAccess } from "@/lib/rotas";
 
 type SetorAreaLayoutProps = {
   children: React.ReactNode;
@@ -18,7 +18,7 @@ export default async function SetorAreaLayout({
   await connection();
 
   const { codigo } = await params;
-  const access = await resolveSetorRouteAccess(codigo);
+  const access = await resolveUnidadeRouteAccess(codigo);
 
   if (!access) {
     notFound();
@@ -46,7 +46,7 @@ export default async function SetorAreaLayout({
       <div className="mx-auto w-full max-w-[816px] px-4 py-8 sm:px-6 sm:py-10">
         <div className="space-y-6">
           <SetorContextCard
-            setor={access.setor}
+            unidade={access.unidade}
             accessCode={access.access.code}
           />
           {children}

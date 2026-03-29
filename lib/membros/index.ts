@@ -1,7 +1,7 @@
 export {
   loadMembersByCelulaId,
   loadMemberByIdAndCelulaId,
-  loadMembersBySetorId,
+  loadMembersByUnidadeId,
   mapMemberToFormValues,
 } from "./queries";
 export {

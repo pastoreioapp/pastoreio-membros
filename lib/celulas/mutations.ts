@@ -27,7 +27,7 @@ export async function createCelula(
       .from(MAPEAMENTO_TABLES.celulas)
       .insert({
         nome: input.nome,
-        setor_id: input.setorId,
+        unidade_id: input.unidadeId,
         lideres: input.lideres,
         dia_semana: input.diaSemana,
         horario: input.horario,

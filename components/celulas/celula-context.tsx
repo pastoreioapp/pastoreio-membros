@@ -81,7 +81,9 @@ export function CelulaContextCard({
   badgeLabel = "Central da célula",
 }: CelulaContextCardProps) {
   const scheduleLabel = getCelulaSchedule(celula);
-  const contextEyebrow = celula?.setor ? `SETOR ${celula.setor}` : "CELULA";
+  const contextEyebrow = celula?.unidadeNome
+    ? `${celula.unidadeTipo ?? "SETOR"} ${celula.unidadeNome}`
+    : "CELULA";
   const contextTitle = celula?.nome ?? "Celula indisponivel";
   const contextPrimaryChip = celula?.lideres
     ? `Lideres: ${celula.lideres}`
@@ -148,7 +150,9 @@ export function CelulaContextContent({
   celula: CelulaOption | null;
 }) {
   const scheduleLabel = getCelulaSchedule(celula);
-  const contextEyebrow = celula?.setor ? `SETOR ${celula.setor}` : "SELECAO DE CONTEXTO";
+  const contextEyebrow = celula?.unidadeNome
+    ? `${celula.unidadeTipo ?? "SETOR"} ${celula.unidadeNome}`
+    : "SELECAO DE CONTEXTO";
   const contextTitle = celula?.nome ?? "Selecione uma celula";
   const contextPrimaryChip = celula?.lideres
     ? `Lideres: ${celula.lideres}`

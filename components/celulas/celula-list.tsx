@@ -15,15 +15,15 @@ import {
 
 type CelulaListProps = {
   celulas: CelulaOption[];
-  setorNome: string;
-  setorAccessCode: string;
+  unidadeNome: string;
+  unidadeAccessCode: string;
 };
 
 function getCelulaSchedule(celula: CelulaOption) {
   return [celula.diaSemana, celula.horario].filter(Boolean).join(", ");
 }
 
-export function CelulaList({ celulas, setorNome, setorAccessCode }: CelulaListProps) {
+export function CelulaList({ celulas, unidadeNome, unidadeAccessCode }: CelulaListProps) {
   return (
     <section className="space-y-5">
       <div className="mt-15 flex flex-col gap-4 pb-1 sm:flex-row sm:items-end sm:justify-between">
@@ -35,12 +35,12 @@ export function CelulaList({ celulas, setorNome, setorAccessCode }: CelulaListPr
             </span>
           </div>
           <p className="mt-1.5 text-sm leading-6 text-text-secondary">
-            Células do setor {setorNome}. Clique para acessar os membros.
+            Células de {unidadeNome}. Clique para acessar os membros.
           </p>
         </div>
 
         <Link
-          href={buildSetorNewCelulaRoute(setorAccessCode)}
+          href={buildSetorNewCelulaRoute(unidadeAccessCode)}
           className="inline-flex min-h-12 shrink-0 items-center justify-center rounded-2xl bg-brand-dark px-6 text-sm font-bold uppercase tracking-widest text-white transition hover:bg-[#2D4E8A]"
         >
           Cadastrar celula
@@ -52,11 +52,10 @@ export function CelulaList({ celulas, setorNome, setorAccessCode }: CelulaListPr
       {celulas.length === 0 ? (
         <div className="rounded-[24px] border border-dashed border-[#C9D4E9] bg-white px-6 py-10 text-center">
           <h3 className="font-heading text-2xl font-extrabold tracking-[-0.03em] text-text-primary">
-            Nenhuma célula vinculada a este setor
+            Nenhuma célula vinculada
           </h3>
           <p className="mx-auto mt-3 max-w-md text-sm leading-6 text-text-secondary">
-            As células serão exibidas aqui assim que forem associadas a este
-            setor.
+            As células serão exibidas aqui assim que forem associadas.
           </p>
         </div>
       ) : (

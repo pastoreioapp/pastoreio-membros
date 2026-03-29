@@ -32,24 +32,24 @@ type ValidateCreateCelulaResult =
 export async function validateCreateCelulaFormData(
   formData: FormData
 ): Promise<ValidateCreateCelulaResult> {
-  const { loadSetorByAccessCode } = await import("@/lib/setores");
+  const { loadUnidadeByAccessCode } = await import("@/lib/unidades");
 
   const nome = readTrimmedString(formData.get(CELULA_FORM_FIELDS.nome));
   const lideres = readOptionalTrimmedString(formData.get(CELULA_FORM_FIELDS.lideres));
   const diaSemana = readOptionalTrimmedString(formData.get(CELULA_FORM_FIELDS.diaSemana));
   const horario = readOptionalTrimmedString(formData.get(CELULA_FORM_FIELDS.horario));
   const codigoAcesso = readOptionalTrimmedString(formData.get(CELULA_FORM_FIELDS.codigoAcesso));
-  const setorCodigoAcesso = readTrimmedString(
-    formData.get(CELULA_FORM_FIELDS.setorCodigoAcesso)
+  const unidadeCodigoAcesso = readTrimmedString(
+    formData.get(CELULA_FORM_FIELDS.unidadeCodigoAcesso)
   );
 
   const fieldErrors: SaveCelulaFieldErrors = {};
-  const resolvedSetor = await loadSetorByAccessCode(setorCodigoAcesso);
+  const resolvedUnidade = await loadUnidadeByAccessCode(unidadeCodigoAcesso);
 
-  if (!setorCodigoAcesso) {
-    fieldErrors.setorCodigoAcesso = "Codigo de acesso do setor e obrigatorio.";
-  } else if (!resolvedSetor) {
-    fieldErrors.setorCodigoAcesso = "Codigo de acesso do setor invalido.";
+  if (!unidadeCodigoAcesso) {
+    fieldErrors.unidadeCodigoAcesso = "Codigo de acesso da unidade e obrigatorio.";
+  } else if (!resolvedUnidade) {
+    fieldErrors.unidadeCodigoAcesso = "Codigo de acesso da unidade invalido.";
   }
 
   if (!nome) {
@@ -94,7 +94,7 @@ export async function validateCreateCelulaFormData(
     success: true,
     data: {
       nome,
-      setorId: resolvedSetor!.setorId,
+      unidadeId: resolvedUnidade!.unidadeId,
       lideres,
       diaSemana,
       horario,

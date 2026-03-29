@@ -7,36 +7,36 @@ alwaysApply: false
 # Domain Layer
 
 ## Server-Only Boundary
-Files that access Supabase (`celulas/queries.ts`, `celulas/validation.ts`, `celulas/mutations.ts`, `membros/queries.ts`, `membros/validation.ts`, `membros/mutations.ts`, `setores.ts`, `rotas.ts`, `form-helpers.ts`) must keep `import "server-only"` at the top. Client-safe modules (`trajetoria.ts`, `constants.ts`, `types.ts`, `routes.ts`, `formatting.ts`) must never import server-only dependencies.
+Files that access Supabase (`celulas/queries.ts`, `celulas/validation.ts`, `celulas/mutations.ts`, `membros/queries.ts`, `membros/validation.ts`, `membros/mutations.ts`, `unidades/queries.ts`, `rotas.ts`, `form-helpers.ts`) must keep `import "server-only"` at the top. Client-safe modules (`trajetoria.ts`, `constants.ts`, `types.ts`, `routes.ts`, `formatting.ts`) must never import server-only dependencies.
 
 ## Entity Folder Structure
-`celulas/` and `membros/` are split by concern:
+`celulas/`, `membros/`, and `unidades/` are split by concern:
 - `queries.ts` — data loaders (Supabase selects, row mappers).
 - `validation.ts` — form data parsing, field-level validation.
 - `mutations.ts` — persistence (insert/update) and state builder helpers.
 - `index.ts` — barrel re-exports. External imports use `@/lib/celulas` or `@/lib/membros` without knowing the internal split.
 
 ## Shared Helpers
-`form-helpers.ts` owns `readTrimmedString`, `readOptionalTrimmedString`, and `normalizeAccessCode`. These are shared across `celulas/validation.ts`, `membros/validation.ts`, and `setores.ts`.
+`form-helpers.ts` owns `readTrimmedString`, `readOptionalTrimmedString`, and `normalizeAccessCode`. These are shared across `celulas/validation.ts`, `membros/validation.ts`, and `unidades/queries.ts`.
 
 ## Supabase Queries
 - Always use `MAPEAMENTO_SCHEMA` and `MAPEAMENTO_TABLES` from `constants.ts` — never raw table/schema strings.
 - Column selection: maintain a `*_SELECT_COLUMNS` constant and a matching `*Row` type per table. When schema changes, update both together.
-- Row-to-domain mapping: each table has a mapper function (e.g., `mapCelulaRowToOption`, `mapMemberRowToListItem`, `mapSetorRowToOption`). New columns go through the mapper, not ad-hoc reads.
-- `celulas/queries.ts` joins `setores(nome)` via the `setor_id` FK to populate `CelulaOption.setor`. The old `celulas.setor` text column is deprecated.
+- Row-to-domain mapping: each table has a mapper function (e.g., `mapCelulaRowToOption`, `mapMemberRowToListItem`, `mapUnidadeRowToOption`). New columns go through the mapper, not ad-hoc reads.
+- `celulas/queries.ts` joins `unidades(nome, tipos_unidade(nome))` via the `unidade_id` FK to populate `CelulaOption.unidadeNome` and `CelulaOption.unidadeTipo`.
 
 ## Validation
 - **Members:** `validateCreateMemberFormData` and `validateUpdateMemberFormData` in `membros/validation.ts` are async (they resolve access codes via DB). They delegate to `validateMemberPayload` for field-level checks. Field keys come from `MEMBER_FORM_FIELDS`.
-- **Cells:** `validateCreateCelulaFormData` in `celulas/validation.ts` is async (it resolves the sector access code). Field keys come from `CELULA_FORM_FIELDS`.
+- **Cells:** `validateCreateCelulaFormData` in `celulas/validation.ts` is async (it resolves the unidade access code). Field keys come from `CELULA_FORM_FIELDS`.
 
 ## Request-Level Caching
-- `loadCelulaByAccessCode`, `resolveLeaderRouteAccess`, `loadSetorByAccessCode`, and `resolveSetorRouteAccess` are wrapped with `React.cache()` to deduplicate Supabase calls within a single request.
+- `loadCelulaByAccessCode`, `resolveLeaderRouteAccess`, `loadUnidadeByAccessCode`, and `resolveUnidadeRouteAccess` are wrapped with `React.cache()` to deduplicate Supabase calls within a single request.
 - Do not add redundant caching layers on top of these functions.
 
 ## Trajectory Insights
 - `computeTrajectoryInsights` in `trajetoria.ts` is the single source of truth for all trajectory analytics. It accepts an array of members and returns overall %, per-category %, and counts.
 - Never compute trajectory percentages ad-hoc — always use this function.
-- The `InsightsPanel` component consumes its output. For setor-level insights, `loadMembersBySetorId` aggregates members across all cells.
+- The `InsightsPanel` component consumes its output. For unidade-level insights, `loadMembersByUnidadeId` aggregates members across all cells.
 
 ## Adding a New Domain Entity
 1. Define types in `types.ts`.
@@ -48,13 +48,13 @@ Files that access Supabase (`celulas/queries.ts`, `celulas/validation.ts`, `celu
 ## Key Functions by File
 | File | Key exports |
 |------|-------------|
-| `celulas/queries.ts` | `loadCelulaByAccessCode`, `loadCelulasBySetorId`, `loadCelulaOptions`, `loadCelulaOptionById` |
+| `celulas/queries.ts` | `loadCelulaByAccessCode`, `loadCelulasByUnidadeId`, `loadCelulaOptions`, `loadCelulaOptionById` |
 | `celulas/validation.ts` | `validateCreateCelulaFormData`, `buildSaveCelulaErrorState` |
 | `celulas/mutations.ts` | `createCelula` |
-| `membros/queries.ts` | `loadMembersByCelulaId`, `loadMemberByIdAndCelulaId`, `loadMembersBySetorId`, `mapMemberToFormValues` |
+| `membros/queries.ts` | `loadMembersByCelulaId`, `loadMemberByIdAndCelulaId`, `loadMembersByUnidadeId`, `mapMemberToFormValues` |
 | `membros/validation.ts` | `validateCreateMemberFormData`, `validateUpdateMemberFormData` |
 | `membros/mutations.ts` | `createMember`, `updateMember`, `buildSaveMemberErrorState`, `buildSaveMemberSuccessState`, `buildUpdateMemberSuccessState` |
 | `form-helpers.ts` | `readTrimmedString`, `readOptionalTrimmedString`, `normalizeAccessCode` |
-| `setores.ts` | `loadSetorByAccessCode` |
-| `rotas.ts` | `resolveLeaderRouteAccess`, `resolveSetorRouteAccess` |
+| `unidades/queries.ts` | `loadUnidadeByAccessCode` |
+| `rotas.ts` | `resolveLeaderRouteAccess`, `resolveUnidadeRouteAccess` |
 | `trajetoria.ts` | `computeTrajectoryInsights`, `TotalPassosTrajetoria`, `CategoriasTrajetoriaEntries` |

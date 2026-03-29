@@ -8,23 +8,24 @@ import { normalizeAccessCode } from "@/lib/form-helpers";
 import { getSupabaseConfigError, getSupabaseServerClient } from "@/lib/supabase/server";
 
 const CELULAS_SELECT_COLUMNS =
-  "id, nome, setor_id, lideres, dia_semana, horario, foto_url, codigo_acesso, setores(nome)";
+  "id, nome, unidade_id, lideres, dia_semana, horario, foto_url, codigo_acesso, unidades(nome, tipos_unidade(nome))";
 const DEFAULT_CELULA_PHOTOS_BUCKET = "celulas";
 const LOAD_CELULAS_ERROR_MESSAGE =
   "Nao foi possivel carregar as celulas agora. Verifique a conexao com o Supabase.";
 
-type SetorJoin = { nome: string };
+type TipoUnidadeJoin = { nome: string };
+type UnidadeJoin = { nome: string; tipos_unidade: TipoUnidadeJoin | TipoUnidadeJoin[] | null };
 
 type CelulaRow = {
   id: string;
   nome: string;
-  setor_id: string | null;
+  unidade_id: string | null;
   lideres: string | null;
   dia_semana: string | null;
   horario: string | null;
   foto_url: string | null;
   codigo_acesso: string | null;
-  setores: SetorJoin | SetorJoin[] | null;
+  unidades: UnidadeJoin | UnidadeJoin[] | null;
 };
 
 function isAbsoluteUrl(value: string) {
@@ -76,17 +77,32 @@ function createPhotoResolver(supabase: ReturnType<typeof getSupabaseServerClient
       : null;
 }
 
+function extractUnidadeJoin(join: CelulaRow["unidades"]): UnidadeJoin | null {
+  if (Array.isArray(join)) {
+    return join[0] ?? null;
+  }
+  return join;
+}
+
+function extractTipoNome(join: UnidadeJoin["tipos_unidade"]): string | null {
+  if (Array.isArray(join)) {
+    return join[0]?.nome ?? null;
+  }
+  return join?.nome ?? null;
+}
+
 function mapCelulaRowToOption(
   celula: CelulaRow,
   resolvePhotoUrl: (fotoUrl: string | null) => string | null
 ): CelulaOption {
+  const unidade = extractUnidadeJoin(celula.unidades);
+
   return {
     id: celula.id,
     nome: celula.nome,
-    setor: Array.isArray(celula.setores)
-      ? celula.setores[0]?.nome ?? null
-      : celula.setores?.nome ?? null,
-    setorId: celula.setor_id,
+    unidadeNome: unidade?.nome ?? null,
+    unidadeId: celula.unidade_id,
+    unidadeTipo: unidade ? extractTipoNome(unidade.tipos_unidade) : null,
     lideres: celula.lideres,
     diaSemana: celula.dia_semana,
     horario: celula.horario,
@@ -182,8 +198,8 @@ export async function loadCelulaOptionById(
   }
 }
 
-export async function loadCelulasBySetorId(
-  setorId: string
+export async function loadCelulasByUnidadeId(
+  unidadeId: string
 ): Promise<LoadCelulasResult> {
   const configError = getSupabaseConfigError();
 
@@ -201,7 +217,7 @@ export async function loadCelulasBySetorId(
       .schema(MAPEAMENTO_SCHEMA)
       .from(MAPEAMENTO_TABLES.celulas)
       .select(CELULAS_SELECT_COLUMNS)
-      .eq("setor_id", setorId)
+      .eq("unidade_id", unidadeId)
       .order("nome", { ascending: true });
 
     if (error) {

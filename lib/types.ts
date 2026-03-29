@@ -3,8 +3,9 @@ import type { PassoTrajetoria } from "@/lib/trajetoria";
 export type CelulaOption = {
   id: string;
   nome: string;
-  setor: string | null;
-  setorId: string | null;
+  unidadeNome: string | null;
+  unidadeId: string | null;
+  unidadeTipo: string | null;
   lideres: string | null;
   diaSemana: string | null;
   horario: string | null;
@@ -12,12 +13,13 @@ export type CelulaOption = {
   codigoAcesso: string | null;
 };
 
-export type SetorOption = {
+export type UnidadeOption = {
   id: string;
   nome: string;
   descricao: string | null;
   lideres: string | null;
   codigoAcesso: string | null;
+  tipo: string;
 };
 
 export type LoadCelulasResult = {
@@ -84,7 +86,7 @@ export type SaveCelulaFieldErrors = {
   diaSemana?: string;
   horario?: string;
   codigoAcesso?: string;
-  setorCodigoAcesso?: string;
+  unidadeCodigoAcesso?: string;
 };
 
 export type SaveCelulaState = {
@@ -101,7 +103,7 @@ export const initialSaveCelulaState: SaveCelulaState = {
 
 export type CreateCelulaInput = {
   nome: string;
-  setorId: string;
+  unidadeId: string;
   lideres: string | null;
   diaSemana: string | null;
   horario: string | null;

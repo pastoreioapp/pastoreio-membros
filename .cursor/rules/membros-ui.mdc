@@ -22,11 +22,11 @@ alwaysApply: false
 These components are `"use client"`. They may import from:
 - `lib/trajetoria.ts` — trajectory steps, categories, totals, `computeTrajectoryInsights`
 - `lib/constants.ts` — `MEMBER_FORM_FIELDS`, `CELULA_FORM_FIELDS`
-- `lib/types.ts` — `CelulaOption`, `SetorOption`, `MemberListItem`, `MemberFormValues`, `SaveMemberState`, `SaveCelulaState`, `TrajectoryInsights`, etc.
+- `lib/types.ts` — `CelulaOption`, `UnidadeOption`, `MemberListItem`, `MemberFormValues`, `SaveMemberState`, `SaveCelulaState`, `TrajectoryInsights`, etc.
 - `lib/routes.ts` — URL builders
 - `lib/formatting.ts` — `formatPhone`, `formatBirthDate`, `formatCreatedAt`
 
-Never import from `lib/celulas/`, `lib/membros/`, `lib/setores.ts`, `lib/rotas.ts`, `lib/form-helpers.ts`, or `lib/supabase/*`.
+Never import from `lib/celulas/`, `lib/membros/`, `lib/unidades/`, `lib/rotas.ts`, `lib/form-helpers.ts`, or `lib/supabase/*`.
 
 ## Member Form Contract
 - `MemberForm` uses `useActionState` with a server action passed as prop.
@@ -38,7 +38,7 @@ Never import from `lib/celulas/`, `lib/membros/`, `lib/setores.ts`, `lib/rotas.t
 ## Cell Form Contract
 - `CelulaForm` uses `useActionState` with `saveSetorCelulaAction`.
 - All form `name` attributes use `CELULA_FORM_FIELDS` constants.
-- `setor_codigo_acesso` is submitted as a hidden input.
+- `unidade_codigo_acesso` is submitted as a hidden input.
 
 ## Insights Panel
 - `InsightsPanel` is a reusable client component that accepts `members` and optional `celulas`/`totalCelulas` props.
@@ -60,7 +60,7 @@ Never import from `lib/celulas/`, `lib/membros/`, `lib/setores.ts`, `lib/rotas.t
 | `celula-list.tsx` | `celulas/` | Cell listing for sector view with "Cadastrar celula" button |
 | `celula-form.tsx` | `celulas/` | Cell creation form (nome, lideres, dia_semana, horario, codigo_acesso) |
 | `insights-panel.tsx` | `insights/` | Trajectory insights with stat cards, category progress, and per-cell ranking |
-| `setor-context.tsx` | `setores/` | Sector context card for sector header |
+| `setor-context.tsx` | `setores/` | Unit (setor/rede/sede) context card for header |
 | `celula-context.tsx` | `celulas/` | Cell context card (`CelulaContextCard`, `CelulaAvatar`) |
 | `back-button.tsx` | `ui/` | History-based back navigation in headers |
 | `access-code-gate.tsx` | `access/` | Unified access code form with celula/setor toggle |

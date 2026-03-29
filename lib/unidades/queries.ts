@@ -4,37 +4,49 @@ import { cache } from "react";
 
 import { normalizeAccessCode } from "@/lib/form-helpers";
 import { MAPEAMENTO_SCHEMA, MAPEAMENTO_TABLES } from "@/lib/constants";
-import type { SetorOption } from "@/lib/types";
+import type { UnidadeOption } from "@/lib/types";
 import { getSupabaseConfigError, getSupabaseServerClient } from "@/lib/supabase/server";
 
-const SETORES_SELECT_COLUMNS = "id, nome, descricao, lideres, codigo_acesso";
+const UNIDADES_SELECT_COLUMNS =
+  "id, nome, descricao, lideres, codigo_acesso, tipos_unidade(nome)";
 
-type SetorRow = {
+type TipoUnidadeJoin = { nome: string };
+
+type UnidadeRow = {
   id: string;
   nome: string;
   descricao: string | null;
   lideres: string | null;
   codigo_acesso: string | null;
+  tipos_unidade: TipoUnidadeJoin | TipoUnidadeJoin[] | null;
 };
 
-function mapSetorRowToOption(row: SetorRow): SetorOption {
+function extractTipoNome(join: UnidadeRow["tipos_unidade"]): string {
+  if (Array.isArray(join)) {
+    return join[0]?.nome ?? "SETOR";
+  }
+  return join?.nome ?? "SETOR";
+}
+
+function mapUnidadeRowToOption(row: UnidadeRow): UnidadeOption {
   return {
     id: row.id,
     nome: row.nome,
     descricao: row.descricao,
     lideres: row.lideres,
     codigoAcesso: row.codigo_acesso,
+    tipo: extractTipoNome(row.tipos_unidade),
   };
 }
 
-export type ResolvedSetorAccess = {
+export type ResolvedUnidadeAccess = {
   code: string;
-  setorId: string;
-  setor: SetorOption;
+  unidadeId: string;
+  unidade: UnidadeOption;
 };
 
-export const loadSetorByAccessCode = cache(
-  async (rawCode: string | null | undefined): Promise<ResolvedSetorAccess | null> => {
+export const loadUnidadeByAccessCode = cache(
+  async (rawCode: string | null | undefined): Promise<ResolvedUnidadeAccess | null> => {
     const normalized = normalizeAccessCode(rawCode);
 
     if (!normalized) {
@@ -51,8 +63,8 @@ export const loadSetorByAccessCode = cache(
       const supabase = getSupabaseServerClient();
       const { data, error } = await supabase
         .schema(MAPEAMENTO_SCHEMA)
-        .from(MAPEAMENTO_TABLES.setores)
-        .select(SETORES_SELECT_COLUMNS)
+        .from(MAPEAMENTO_TABLES.unidades)
+        .select(UNIDADES_SELECT_COLUMNS)
         .eq("codigo_acesso", normalized)
         .maybeSingle();
 
@@ -60,12 +72,12 @@ export const loadSetorByAccessCode = cache(
         return null;
       }
 
-      const setor = mapSetorRowToOption(data as SetorRow);
+      const unidade = mapUnidadeRowToOption(data as UnidadeRow);
 
       return {
         code: normalized,
-        setorId: setor.id,
-        setor,
+        unidadeId: unidade.id,
+        unidade,
       };
     } catch {
       return null;

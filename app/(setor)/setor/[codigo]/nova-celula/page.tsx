@@ -1,7 +1,7 @@
 import { notFound } from "next/navigation";
 
 import { CelulaForm } from "@/components/celulas/celula-form";
-import { resolveSetorRouteAccess } from "@/lib/rotas";
+import { resolveUnidadeRouteAccess } from "@/lib/rotas";
 
 type SetorNewCelulaPageProps = {
   params: Promise<{ codigo: string }>;
@@ -11,7 +11,7 @@ export default async function SetorNewCelulaPage({
   params,
 }: SetorNewCelulaPageProps) {
   const { codigo } = await params;
-  const access = await resolveSetorRouteAccess(codigo);
+  const access = await resolveUnidadeRouteAccess(codigo);
 
   if (!access) {
     notFound();
@@ -19,8 +19,8 @@ export default async function SetorNewCelulaPage({
 
   return (
     <CelulaForm
-      setorAccessCode={access.access.code}
-      setorNome={access.setor.nome}
+      unidadeAccessCode={access.access.code}
+      unidadeNome={access.unidade.nome}
     />
   );
 }

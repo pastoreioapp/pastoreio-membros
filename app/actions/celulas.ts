@@ -12,9 +12,9 @@ import { buildSetorCelulasRoute } from "@/lib/routes";
 import { CELULA_FORM_FIELDS } from "@/lib/constants";
 import type { SaveCelulaState } from "@/lib/types";
 
-function readSetorAccessCode(formData: FormData) {
-  return typeof formData.get(CELULA_FORM_FIELDS.setorCodigoAcesso) === "string"
-    ? (formData.get(CELULA_FORM_FIELDS.setorCodigoAcesso) as string)
+function readUnidadeAccessCode(formData: FormData) {
+  return typeof formData.get(CELULA_FORM_FIELDS.unidadeCodigoAcesso) === "string"
+    ? (formData.get(CELULA_FORM_FIELDS.unidadeCodigoAcesso) as string)
     : "";
 }
 
@@ -22,7 +22,7 @@ export async function saveSetorCelulaAction(
   _prevState: SaveCelulaState,
   formData: FormData
 ): Promise<SaveCelulaState> {
-  const setorAccessCode = readSetorAccessCode(formData);
+  const unidadeAccessCode = readUnidadeAccessCode(formData);
   const validation = await validateCreateCelulaFormData(formData);
 
   if (!validation.success) {
@@ -32,8 +32,8 @@ export async function saveSetorCelulaAction(
   const result = await createCelula(validation.data);
 
   if (result.success) {
-    revalidatePath(buildSetorCelulasRoute(setorAccessCode));
-    redirect(buildSetorCelulasRoute(setorAccessCode));
+    revalidatePath(buildSetorCelulasRoute(unidadeAccessCode));
+    redirect(buildSetorCelulasRoute(unidadeAccessCode));
   }
 
   return buildSaveCelulaErrorState(result.message);

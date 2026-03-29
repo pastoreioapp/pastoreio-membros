@@ -121,8 +121,8 @@ export async function loadMemberByIdAndCelulaId(
   }
 }
 
-export async function loadMembersBySetorId(
-  setorId: string
+export async function loadMembersByUnidadeId(
+  unidadeId: string
 ): Promise<{ members: MemberListItem[]; loadError: string | null }> {
   const configError = getSupabaseConfigError();
 
@@ -137,7 +137,7 @@ export async function loadMembersBySetorId(
       .schema(MAPEAMENTO_SCHEMA)
       .from(MAPEAMENTO_TABLES.celulas)
       .select("id")
-      .eq("setor_id", setorId);
+      .eq("unidade_id", unidadeId);
 
     if (celulasError) {
       throw celulasError;

@@ -1,7 +1,7 @@
 export {
   loadCelulaOptions,
   loadCelulaOptionById,
-  loadCelulasBySetorId,
+  loadCelulasByUnidadeId,
   loadCelulaByAccessCode,
 } from "./queries";
 export type { ResolvedCelulaAccess } from "./queries";

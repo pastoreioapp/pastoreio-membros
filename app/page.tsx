@@ -4,7 +4,7 @@ import { redirect } from "next/navigation";
 
 import { AccessCodeGate } from "@/components/access/access-code-gate";
 import { loadCelulaByAccessCode } from "@/lib/celulas";
-import { loadSetorByAccessCode } from "@/lib/setores";
+import { loadUnidadeByAccessCode } from "@/lib/unidades";
 import {
   ACCESS_CODE_SEARCH_PARAM,
   ACCESS_TYPE_SEARCH_PARAM,
@@ -44,7 +44,7 @@ export default async function Home({ searchParams }: HomePageProps) {
 
   if (hasProvidedCode) {
     if (accessType === ACCESS_TYPE_SETOR) {
-      const resolved = await loadSetorByAccessCode(rawCode);
+      const resolved = await loadUnidadeByAccessCode(rawCode);
 
       if (resolved) {
         redirect(buildSetorCelulasRoute(resolved.code));

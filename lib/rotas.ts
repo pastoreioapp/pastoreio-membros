@@ -3,7 +3,7 @@ import "server-only";
 import { cache } from "react";
 
 import { loadCelulaByAccessCode } from "@/lib/celulas";
-import { loadSetorByAccessCode } from "@/lib/setores";
+import { loadUnidadeByAccessCode } from "@/lib/unidades";
 
 export const resolveLeaderRouteAccess = cache(async (code: string) => {
   const resolved = await loadCelulaByAccessCode(code);
@@ -22,8 +22,8 @@ export const resolveLeaderRouteAccess = cache(async (code: string) => {
   };
 });
 
-export const resolveSetorRouteAccess = cache(async (code: string) => {
-  const resolved = await loadSetorByAccessCode(code);
+export const resolveUnidadeRouteAccess = cache(async (code: string) => {
+  const resolved = await loadUnidadeByAccessCode(code);
 
   if (!resolved) {
     return null;
@@ -32,8 +32,8 @@ export const resolveSetorRouteAccess = cache(async (code: string) => {
   return {
     access: {
       code: resolved.code,
-      setorId: resolved.setorId,
+      unidadeId: resolved.unidadeId,
     },
-    setor: resolved.setor,
+    unidade: resolved.unidade,
   };
 });

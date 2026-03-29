@@ -30,13 +30,8 @@ FOREIGN KEY (unidade_id)
 REFERENCES mapeamento.unidades(id)
 ON DELETE SET NULL;
 
-UPDATE mapeamento.celulas c
-SET unidade_id = u.id
-FROM mapeamento.unidades u
-WHERE c.setor_id = u.id;
 
-
--- Insertions initial data
+-- Seed reference data and migrate existing setores into unidades
 
 INSERT INTO mapeamento.tipos_unidade (id, nome, nivel) VALUES
 ('11111111-1111-1111-1111-111111111111', 'SEDE', 5),
@@ -87,3 +82,20 @@ SELECT
     s.codigo_acesso
 FROM mapeamento.setores s
 ON CONFLICT (id) DO NOTHING;
+
+
+-- Backfill celulas.unidade_id now that unidades is populated
+
+UPDATE mapeamento.celulas c
+SET unidade_id = u.id
+FROM mapeamento.unidades u
+WHERE c.setor_id = u.id;
+
+
+-- Performance indexes
+
+CREATE INDEX IF NOT EXISTS idx_celulas_unidade_id
+ON mapeamento.celulas(unidade_id);
+
+CREATE INDEX IF NOT EXISTS idx_unidades_parent_id
+ON mapeamento.unidades(parent_id);
