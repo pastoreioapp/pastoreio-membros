@@ -1,10 +1,12 @@
 import { notFound } from "next/navigation";
 
 import { CelulaList } from "@/components/celulas/celula-list";
-import { InsightsPanel } from "@/components/insights/insights-panel";
+import { CelulaRankingSection, InsightsPanel } from "@/components/insights/insights-panel";
 import { UnidadeList } from "@/components/unidades/unidade-list";
+import { UnidadeTabPanel } from "@/components/unidades/unidade-tab-panel";
 import { loadCelulasByUnidadeId, loadCelulasByDescendantUnidades } from "@/lib/celulas";
 import { loadMembersByUnidadeId, loadMembersByDescendantUnidades } from "@/lib/membros";
+import { computeCelulaRankings } from "@/lib/trajetoria";
 import { loadUnidadesFilhas } from "@/lib/unidades";
 import { resolveUnidadeRouteAccess } from "@/lib/rotas";
 
@@ -43,10 +45,15 @@ export default async function SetorCelulasPage({
       );
     }
 
+    const rankings = computeCelulaRankings(celulas, members);
+
     return (
       <>
-        <InsightsPanel members={members} totalCelulas={celulas.length} celulas={celulas} unidadeTipo={unidade.tipo} />
-        <UnidadeList unidades={childUnidades} parentNome={unidade.nome} />
+        <InsightsPanel members={members} totalCelulas={celulas.length} celulas={celulas} unidadeTipo={unidade.tipo} hideRankings />
+        <UnidadeTabPanel
+          unidades={<UnidadeList unidades={childUnidades} parentNome={unidade.nome} />}
+          rankings={<CelulaRankingSection rankings={rankings} unidadeTipo={unidade.tipo} />}
+        />
       </>
     );
   }

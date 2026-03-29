@@ -134,7 +134,9 @@ export function CelulaSelector({
 
                           <div className="min-w-0 flex-1">
                             <p className="text-[11px] font-bold uppercase tracking-widest text-brand-dark">
-                              {celula.setor ? `SETOR ${celula.setor}` : "CELULA"}
+                              {celula.unidadeNome
+                                ? `${celula.unidadeTipo ?? "SETOR"} ${celula.unidadeNome}`
+                                : "CÉLULA"}
                             </p>
                             <p className="font-heading mt-1 text-lg font-extrabold tracking-[-0.03em] text-text-primary">
                               {celula.nome}

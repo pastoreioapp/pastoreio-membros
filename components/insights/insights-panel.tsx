@@ -13,6 +13,7 @@ type InsightsPanelProps = {
   totalCelulas?: number;
   celulas?: CelulaOption[];
   unidadeTipo?: string;
+  hideRankings?: boolean;
 };
 
 function StatCard({
@@ -139,11 +140,37 @@ function getRankingSubtitle(tipo?: string): string {
   return `Comparativo de progresso entre as celulas ${article} ${lower}.`;
 }
 
+export function CelulaRankingSection({
+  rankings,
+  unidadeTipo,
+}: {
+  rankings: CelulaRanking[];
+  unidadeTipo?: string;
+}) {
+  if (rankings.length === 0) return null;
+
+  return (
+    <div className="rounded-[24px] bg-white border border-border-default p-5 sm:p-6">
+      <h3 className="font-heading text-lg font-extrabold tracking-[-0.03em] text-text-primary">
+        Trajetoria por celula
+      </h3>
+      <p className="mt-1 text-sm leading-6 text-text-secondary">
+        {getRankingSubtitle(unidadeTipo)}
+      </p>
+
+      <div className="mt-4">
+        <CelulaRankingList rankings={rankings} />
+      </div>
+    </div>
+  );
+}
+
 export function InsightsPanel({
   members,
   totalCelulas,
   celulas,
   unidadeTipo,
+  hideRankings,
 }: InsightsPanelProps) {
   const insights = useMemo(
     () => computeTrajectoryInsights(members),
@@ -211,19 +238,8 @@ export function InsightsPanel({
         </div>
       </div>
 
-      {showRankings ? (
-        <div className="rounded-[24px] bg-white border border-border-default p-5 sm:p-6">
-          <h3 className="font-heading text-lg font-extrabold tracking-[-0.03em] text-text-primary">
-            Trajetoria por celula
-          </h3>
-          <p className="mt-1 text-sm leading-6 text-text-secondary">
-            {getRankingSubtitle(unidadeTipo)}
-          </p>
-
-          <div className="mt-4">
-            <CelulaRankingList rankings={rankings} />
-          </div>
-        </div>
+      {showRankings && !hideRankings ? (
+        <CelulaRankingSection rankings={rankings} unidadeTipo={unidadeTipo} />
       ) : null}
     </section>
   );
