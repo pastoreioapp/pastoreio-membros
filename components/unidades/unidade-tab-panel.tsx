@@ -2,25 +2,30 @@
 
 import { type ReactNode, useState } from "react";
 
-type Tab = "unidades" | "rankings";
+type Tab = "primary" | "rankings";
 
 type UnidadeTabPanelProps = {
-  unidades: ReactNode;
+  primaryLabel: string;
+  primaryContent: ReactNode;
   rankings: ReactNode;
 };
 
-const TAB_CONFIG: { id: Tab; label: string }[] = [
-  { id: "unidades", label: "Unidades" },
-  { id: "rankings", label: "Classificacao de celulas" },
-];
+export function UnidadeTabPanel({
+  primaryLabel,
+  primaryContent,
+  rankings,
+}: UnidadeTabPanelProps) {
+  const [activeTab, setActiveTab] = useState<Tab>("primary");
 
-export function UnidadeTabPanel({ unidades, rankings }: UnidadeTabPanelProps) {
-  const [activeTab, setActiveTab] = useState<Tab>("unidades");
+  const tabs: { id: Tab; label: string }[] = [
+    { id: "primary", label: primaryLabel },
+    { id: "rankings", label: "Classificacao de celulas" },
+  ];
 
   return (
     <div className="space-y-5">
       <div className="flex rounded-full border border-[#E2E5ED] bg-[#F7F8FC] p-1">
-        {TAB_CONFIG.map(({ id, label }) => (
+        {tabs.map(({ id, label }) => (
           <button
             key={id}
             type="button"
@@ -36,7 +41,7 @@ export function UnidadeTabPanel({ unidades, rankings }: UnidadeTabPanelProps) {
         ))}
       </div>
 
-      {activeTab === "unidades" ? unidades : rankings}
+      {activeTab === "primary" ? primaryContent : rankings}
     </div>
   );
 }

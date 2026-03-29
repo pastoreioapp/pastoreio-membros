@@ -51,7 +51,8 @@ export default async function SetorCelulasPage({
       <>
         <InsightsPanel members={members} totalCelulas={celulas.length} celulas={celulas} unidadeTipo={unidade.tipo} hideRankings />
         <UnidadeTabPanel
-          unidades={<UnidadeList unidades={childUnidades} parentNome={unidade.nome} />}
+          primaryLabel="Unidades"
+          primaryContent={<UnidadeList unidades={childUnidades} parentNome={unidade.nome} />}
           rankings={<CelulaRankingSection rankings={rankings} unidadeTipo={unidade.tipo} />}
         />
       </>
@@ -74,13 +75,21 @@ export default async function SetorCelulasPage({
     );
   }
 
+  const rankings = computeCelulaRankings(celulas, members);
+
   return (
     <>
-      <InsightsPanel members={members} totalCelulas={celulas.length} celulas={celulas} unidadeTipo={unidade.tipo} />
-      <CelulaList
-        celulas={celulas}
-        unidadeNome={unidade.nome}
-        unidadeAccessCode={access.access.code}
+      <InsightsPanel members={members} totalCelulas={celulas.length} celulas={celulas} unidadeTipo={unidade.tipo} hideRankings />
+      <UnidadeTabPanel
+        primaryLabel="Celulas"
+        primaryContent={
+          <CelulaList
+            celulas={celulas}
+            unidadeNome={unidade.nome}
+            unidadeAccessCode={access.access.code}
+          />
+        }
+        rankings={<CelulaRankingSection rankings={rankings} unidadeTipo={unidade.tipo} />}
       />
     </>
   );
