@@ -108,3 +108,20 @@ Server-only client. All DB access flows through `lib/*`.
 
 ## Contextual Rules
 File-specific rules for the Cursor editor live in `.cursor/rules/*.mdc`. They are auto-injected when matching files are open.
+
+## Cursor Cloud specific instructions
+
+### Services overview
+| Service | How to run | Notes |
+|---------|-----------|-------|
+| Next.js dev server | `npm run dev` (port 3000) | The only local service; all data comes from remote Supabase |
+| Supabase | External hosted instance | Requires `NEXT_PUBLIC_SUPABASE_URL` + `NEXT_PUBLIC_SUPABASE_ANON_KEY` env vars (set as Cursor secrets) |
+
+### Development commands
+All standard commands are in `package.json` scripts — see the "Dev & CI" section above.
+
+### Caveats
+- There is no test framework configured. Validation relies on `npm run lint`, `npm run build`, and manual browser testing.
+- The Supabase instance is remote (no local Docker setup). If Supabase credentials are missing or invalid, every server-rendered page will fail at data fetch time — look for Supabase connection errors in the terminal running `npm run dev`.
+- The app uses Next.js 16 with Turbopack. Always read `node_modules/next/dist/docs/` before using unfamiliar Next.js APIs — many conventions differ from earlier versions.
+- `params` and `searchParams` in page/layout components are `Promise<...>` — always `await` them.
